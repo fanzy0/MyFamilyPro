@@ -1,0 +1,836 @@
+---
+globs: *.java,*.xml,*.md,*.sql,*.js,*.wxml,*.wxss,*.json
+alwaysApply: false
+---
+# MyFamily项目开发规范
+
+## 🎯 核心原则
+你是MyFamily项目的全栈开发专家，负责微信小程序前端和Spring Boot后端的开发工作。严格遵循本项目的架构规范和开发流程。
+
+## 📚 快速导航
+1. [项目架构](#项目架构) - 前后端项目结构
+2. [前端开发规范](#前端开发规范) - 微信小程序开发
+3. [后端开发规范](#后端开发规范) - Spring Boot应用
+4. [数据库规范](#数据库规范) - MySQL数据库
+5. [接口规范](#接口规范) - 前后端接口约定
+6. [文档管理](#文档管理) - SQL和接口文档
+
+---
+
+## 项目架构
+
+### 项目结构
+```
+WeChatDev (项目根目录)
+├── MyFamilyWeb/        (微信小程序前端)
+│   ├── pages/          (页面目录)
+│   │   ├── index/      (首页)
+│   │   └── ...         (其他页面)
+│   ├── components/     (组件目录)
+│   ├── utils/          (工具类目录，待建)
+│   ├── app.js          (小程序入口)
+│   ├── app.json        (小程序配置)
+│   └── app.wxss        (全局样式)
+│
+└── MyFamilyBack/       (Spring Boot后端)
+    ├── pom.xml         (父项目POM)
+    └── paxl/           (业务模块)
+        ├── pom.xml
+        ├── sql/        (SQL脚本目录)
+        ├── api/        (接口文档目录)
+        └── src/main/
+            ├── java/com/my/family/paxl/
+            │   ├── PaxlApplication.java  (启动类)
+            │   ├── controller/           (控制器层)
+            │   ├── service/              (服务层)
+            │   │   └── impl/             (服务实现)
+            │   ├── mapper/               (Mapper接口)
+            │   ├── domain/               (领域对象)
+            │   │   └── entity/           (实体类)
+            │   └── config/               (配置类)
+            └── resources/
+                ├── mapper/               (MyBatis XML)
+                └── application.yml       (配置文件)
+```
+
+### 模块职责
+| 层次 | 位置 | 职责 |
+|-----|------|------|
+| 前端页面 | MyFamilyWeb/pages/ | 小程序页面（wxml、wxss、js、json） |
+| 前端组件 | MyFamilyWeb/components/ | 自定义组件 |
+| 前端工具 | MyFamilyWeb/utils/ | 工具函数、API封装 |
+| 后端控制层 | paxl/controller/ | 接收HTTP请求、参数校验 |
+| 后端业务层 | paxl/service/ | 业务逻辑处理 |
+| 后端数据层 | paxl/mapper/ | 数据库访问 |
+| 实体类 | paxl/domain/entity/ | 数据库实体对象 |
+| SQL脚本 | paxl/sql/ | 数据库初始化脚本 |
+| 接口文档 | paxl/api/ | 接口文档 |
+
+---
+
+## 前端开发规范
+
+### 核心原则
+- 严格遵循[微信小程序设计指南](https://developers.weixin.qq.com/miniprogram/design/)
+- 参考[微信小程序开发文档](https://developers.weixin.qq.com/miniprogram/dev/framework/)的语法和API
+
+### 目录结构规范
+```
+pages/
+├── index/               # 页面目录（每个页面一个文件夹）
+│   ├── index.js        # 页面逻辑
+│   ├── index.wxml      # 页面结构
+│   ├── index.wxss      # 页面样式
+│   └── index.json      # 页面配置
+│
+components/
+├── navigation-bar/      # 组件目录
+│   ├── navigation-bar.js
+│   ├── navigation-bar.wxml
+│   ├── navigation-bar.wxss
+│   └── navigation-bar.json
+│
+utils/
+├── request.js          # 网络请求封装（待建）
+├── util.js             # 工具函数（待建）
+└── config.js           # 配置文件（待建）
+```
+
+### 页面开发规范
+
+#### 1. 页面结构（WXML）
+- 遵循微信小程序WXML语法
+- 使用语义化标签（view、text、image、swiper等）
+- 数据绑定使用双大括号：`{{变量名}}`
+- 条件渲染：`wx:if`、`wx:elif`、`wx:else`
+- 列表渲染：`wx:for`，设置`wx:key`
+- 事件绑定：`bind事件名`或`catch事件名`
+
+```xml
+<!-- 示例：列表渲染 -->
+<view wx:for="{{list}}" wx:key="id" bindtap="onItemTap" data-item="{{item}}">
+  <text>{{item.name}}</text>
+</view>
+```
+
+#### 2. 页面样式（WXSS）
+- 使用rpx作为响应式单位（750rpx = 屏幕宽度）
+- 遵循微信小程序设计规范的尺寸和颜色
+- 样式命名使用kebab-case（`header-title`）
+- 避免使用内联样式，优先使用class
+
+```css
+/* 示例 */
+.container {
+  padding: 32rpx;
+  background-color: #f5f5f5;
+}
+
+.title {
+  font-size: 32rpx;
+  color: #333;
+}
+```
+
+#### 3. 页面逻辑（JS）
+- 使用Page()构造器注册页面
+- data中定义页面初始数据
+- 必须包含完整的生命周期函数注释
+- 使用setData()更新数据
+- 事件处理函数清晰命名
+
+```javascript
+Page({
+  /**
+   * 页面的初始数据
+   */
+  data: {
+    list: [],
+    loading: false
+  },
+
+  /**
+   * 生命周期函数--监听页面加载
+   */
+  onLoad(options) {
+    this.loadData();
+  },
+
+  /**
+   * 加载数据
+   */
+  loadData() {
+    this.setData({
+      loading: true
+    });
+    // 请求数据...
+  },
+
+  /**
+   * 页面相关事件处理函数--监听用户下拉动作
+   */
+  onPullDownRefresh() {
+    this.loadData();
+    wx.stopPullDownRefresh();
+  }
+});
+```
+
+#### 4. 页面配置（JSON）
+- navigationBarTitleText：页面标题
+- navigationBarBackgroundColor：导航栏背景色
+- enablePullDownRefresh：是否开启下拉刷新
+
+```json
+{
+  "navigationBarTitleText": "页面标题",
+  "enablePullDownRefresh": true
+}
+```
+
+### API调用规范
+
+#### 网络请求
+- 使用`wx.request()`调用后端接口
+- 配置API基础地址（在utils/config.js中统一管理）
+- 请求失败时显示友好的错误提示
+- 使用Promise封装请求，便于async/await调用
+
+```javascript
+// 示例：调用后端接口
+wx.request({
+  url: `${apiBaseUrl}/api/banner/list`,
+  method: 'GET',
+  success: (res) => {
+    if (res.statusCode === 200) {
+      // 处理成功响应
+      this.setData({
+        list: res.data
+      });
+    }
+  },
+  fail: (err) => {
+    console.error('请求失败:', err);
+    wx.showToast({
+      title: '加载失败',
+      icon: 'none'
+    });
+  }
+});
+```
+
+#### 交互反馈
+- 使用`wx.showToast()`显示提示信息
+- 使用`wx.showLoading()`显示加载中
+- 使用`wx.showModal()`显示确认对话框
+
+### 组件开发规范
+- 使用Component()构造器注册组件
+- 在`components/`目录下创建组件文件夹
+- 组件命名使用kebab-case
+- 定义清晰的properties和methods
+- 组件通信使用事件（triggerEvent）
+
+```javascript
+Component({
+  /**
+   * 组件的属性列表
+   */
+  properties: {
+    title: {
+      type: String,
+      value: ''
+    }
+  },
+
+  /**
+   * 组件的方法列表
+   */
+  methods: {
+    onTap() {
+      this.triggerEvent('tap', { /* 数据 */ });
+    }
+  }
+});
+```
+
+### 开发检查清单（前端）
+- [ ] 页面文件夹包含完整的js、wxml、wxss、json文件
+- [ ] data中定义了所有使用的变量
+- [ ] 生命周期函数有完整注释
+- [ ] wx:for使用了wx:key
+- [ ] 事件处理函数命名清晰
+- [ ] 网络请求有错误处理
+- [ ] 样式使用rpx单位
+- [ ] 遵循微信小程序设计规范
+
+---
+
+## 后端开发规范
+
+### 核心技术栈
+- **Java**: 1.8
+- **Spring Boot**: 2.6.13
+- **MyBatis Plus**: 3.5.3.1
+- **MySQL**: 8.0+
+- **Lombok**: 注解简化代码
+
+### 新增表开发流程（必须遵循）
+
+**流程**: 编写SQL → 创建Entity → 创建Mapper → 创建XML → 创建Service → 创建Controller → 更新文档
+
+#### 1. 编写SQL（位置: paxl/sql/init.sql）
+**注意：必须使用MySQL语法**
+
+```sql
+-- 表结构 + 注释 + 索引 + 初始化数据
+DROP TABLE IF EXISTS `t_user`;
+CREATE TABLE `t_user` (
+    `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `user_id` BIGINT NOT NULL COMMENT '用户业务ID',
+    `user_name` VARCHAR(100) NOT NULL COMMENT '用户名',
+    `create_time` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_id` (`user_id`),
+    KEY `idx_user_name` (`user_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='用户表';
+```
+
+#### 2. 创建Entity（位置: paxl/domain/entity/）
+```java
+package com.my.family.paxl.domain.entity;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+
+/**
+ * 用户实体类，对应数据库表：t_user
+ *
+ * @author ai
+ * @date 2026/02/28
+ */
+public class UserDO implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 主键ID，自增
+     */
+    private Long id;
+
+    /**
+     * 用户业务ID
+     */
+    private Long userId;
+
+    /**
+     * 用户名
+     */
+    private String userName;
+
+    /**
+     * 创建时间
+     */
+    private LocalDateTime createTime;
+
+    /**
+     * 更新时间
+     */
+    private LocalDateTime updateTime;
+
+    // getter、setter、toString方法（手动编写或使用Lombok @Data注解）
+}
+```
+
+#### 3. 创建Mapper接口（位置: paxl/mapper/）
+```java
+package com.my.family.paxl.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.my.family.paxl.domain.entity.UserDO;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+/**
+ * 用户Mapper接口
+ *
+ * @author ai
+ * @date 2026/02/28
+ */
+@Mapper
+public interface UserMapper extends BaseMapper<UserDO> {
+
+    /**
+     * 根据用户名模糊查询
+     *
+     * @param userName 用户名
+     * @return 用户列表
+     */
+    List<UserDO> selectByUserNameLike(@Param("userName") String userName);
+}
+```
+
+#### 4. 创建Mapper XML（位置: paxl/resources/mapper/）
+**注意：必须使用MySQL语法和动态SQL**
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.UserMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.my.family.paxl.domain.entity.UserDO">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="user_name" property="userName"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 根据用户名模糊查询 -->
+    <select id="selectByUserNameLike" resultMap="BaseResultMap">
+        SELECT id, user_id, user_name, create_time, update_time
+        FROM t_user
+        WHERE user_name LIKE CONCAT('%', #{userName}, '%')
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>
+```
+
+**动态SQL示例**：
+```xml
+<!-- 动态条件查询 -->
+<select id="selectByCondition" resultMap="BaseResultMap">
+    SELECT * FROM t_user
+    <where>
+        <if test="userName != null and userName != ''">
+            AND user_name LIKE CONCAT('%', #{userName}, '%')
+        </if>
+        <if test="status != null">
+            AND status = #{status}
+        </if>
+    </where>
+    ORDER BY create_time DESC
+    <if test="limit != null and limit > 0">
+        LIMIT #{limit} OFFSET #{offset}
+    </if>
+</select>
+```
+
+#### 5. 创建Service（位置: paxl/service/和paxl/service/impl/）
+
+**Service接口：**
+```java
+package com.my.family.paxl.service;
+
+import com.my.family.paxl.domain.entity.UserDO;
+import java.util.List;
+
+/**
+ * 用户服务接口
+ *
+ * @author ai
+ * @date 2026/02/28
+ */
+public interface UserService {
+
+    /**
+     * 根据用户名查询用户
+     *
+     * @param userName 用户名
+     * @return 用户列表
+     */
+    List<UserDO> queryByUserName(String userName);
+
+    /**
+     * 保存用户
+     *
+     * @param userDO 用户对象
+     * @return 保存后的用户对象
+     */
+    UserDO saveUser(UserDO userDO);
+}
+```
+
+**Service实现：**
+```java
+package com.my.family.paxl.service.impl;
+
+import com.my.family.paxl.domain.entity.UserDO;
+import com.my.family.paxl.mapper.UserMapper;
+import com.my.family.paxl.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+/**
+ * 用户服务实现
+ *
+ * @author ai
+ * @date 2026/02/28
+ */
+@Service
+@Slf4j
+public class UserServiceImpl implements UserService {
+
+    private final UserMapper userMapper;
+
+    public UserServiceImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
+    @Override
+    public List<UserDO> queryByUserName(String userName) {
+        log.info("[QueryByUserName] 开始查询, userName={}", userName);
+        List<UserDO> users = userMapper.selectByUserNameLike(userName);
+        log.info("[QueryByUserName] 查询完成, count={}", users.size());
+        return users;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public UserDO saveUser(UserDO userDO) {
+        log.info("[SaveUser] 开始保存用户, userName={}", userDO.getUserName());
+        userMapper.insert(userDO);
+        log.info("[SaveUser] 保存成功, userId={}", userDO.getUserId());
+        return userDO;
+    }
+}
+```
+
+#### 6. 创建Controller（位置: paxl/controller/）
+```java
+package com.my.family.paxl.controller;
+
+import com.my.family.paxl.domain.entity.UserDO;
+import com.my.family.paxl.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+/**
+ * 用户控制器
+ *
+ * @author ai
+ * @date 2026/02/28
+ */
+@RestController
+@RequestMapping("/api/user")
+@Slf4j
+public class UserController {
+
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
+    /**
+     * 查询用户列表
+     *
+     * @param userName 用户名（可选）
+     * @return 用户列表
+     */
+    @GetMapping("/list")
+    public ResponseEntity<List<UserDO>> listUsers(@RequestParam(required = false) String userName) {
+        try {
+            log.info("[ListUsers] 开始查询, userName={}", userName);
+            List<UserDO> users = userService.queryByUserName(userName);
+            log.info("[ListUsers] 查询成功, count={}", users.size());
+            return ResponseEntity.ok(users);
+
+        } catch (Exception e) {
+            log.error("[ListUsers] 查询用户列表异常, userName={}", userName, e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 保存用户
+     *
+     * @param userDO 用户对象
+     * @return 操作结果
+     */
+    @PostMapping("/save")
+    public ResponseEntity<String> saveUser(@RequestBody UserDO userDO) {
+        try {
+            if (userDO == null) {
+                return ResponseEntity.badRequest().body("用户信息不能为空");
+            }
+            if (!StringUtils.hasText(userDO.getUserName())) {
+                return ResponseEntity.badRequest().body("用户名不能为空");
+            }
+
+            UserDO savedUser = userService.saveUser(userDO);
+            log.info("[SaveUser] 保存成功, userId={}", savedUser.getUserId());
+            return ResponseEntity.ok("保存成功");
+
+        } catch (IllegalArgumentException e) {
+            log.warn("[SaveUser] 参数校验失败, msg={}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("[SaveUser] 保存用户异常", e);
+            return ResponseEntity.internalServerError().body("保存失败: " + e.getMessage());
+        }
+    }
+}
+```
+
+#### 7. 更新SQL文档
+将步骤1的SQL添加到`paxl/sql/init.sql`
+
+#### 8. 更新接口文档
+在`paxl/api/`目录下创建或更新接口文档
+
+---
+
+## 数据库规范
+
+### MySQL语法规范
+- **数据库类型**：MySQL 8.0+
+- ✅ 表名使用小写+下划线：`t_user`、`t_banner`
+- ✅ 字段名使用小写+下划线：`user_name`、`create_time`
+- ✅ 使用InnoDB引擎
+- ✅ 字符集使用utf8mb4
+- ✅ 自增主键使用BIGINT
+- ✅ 时间字段使用DATETIME
+- ✅ 所有表和字段必须有COMMENT注释
+- ✅ 重要字段添加索引（UNIQUE KEY、KEY）
+- ✅ 创建时间默认值：DEFAULT CURRENT_TIMESTAMP
+- ✅ 更新时间自动更新：ON UPDATE CURRENT_TIMESTAMP
+
+### 数据库操作规范
+- ❌ **禁止在循环中进行单个数据库操作**
+- ❌ **禁止使用MyBatis Plus的自动SQL方法（insert、update、delete等）**
+- ❌ **禁止Mapper方法使用多个零散参数**（如：method(String a, String b, Integer c)）
+- ✅ **所有SQL必须手写在Mapper XML中**，便于统一管理和优化
+- ✅ **Mapper方法参数使用对象封装**，通过Entity等对象传递参数
+- ✅ **使用MyBatis动态SQL**（`<if>`、`<where>`、`<set>`等）根据对象属性动态生成SQL条件
+- ✅ 使用MyBatis批量操作或SqlSession批处理
+- ✅ Service层方法添加@Transactional注解
+- ✅ SQL使用参数化查询（#{}而非${}）
+
+---
+
+## 接口规范
+
+### RESTful接口设计
+- 接口路径：`/api/{模块}/{操作}`
+- 查询接口：GET方法
+- 保存/更新接口：POST方法
+- 删除接口：POST方法（或DELETE）
+
+### 响应格式
+- 成功响应：`ResponseEntity.ok(data)`，状态码200
+- 参数错误：`ResponseEntity.badRequest().body(message)`，状态码400
+- 服务器错误：`ResponseEntity.internalServerError().body(message)`，状态码500
+
+### 接口示例
+```
+GET  /api/banner/list              - 查询轮播图列表
+POST /api/banner/save              - 保存轮播图
+POST /api/banner/delete            - 删除轮播图
+GET  /api/banner/image/view?path=xxx - 查看图片
+```
+
+### 前后端接口约定
+1. **API基础地址**：在小程序中统一配置（如：`https://fzyld.xyz`）
+2. **请求头**：`Content-Type: application/json`
+3. **响应格式**：JSON格式
+4. **错误处理**：后端返回清晰的错误信息，前端显示友好提示
+
+---
+
+## 文档管理
+
+### SQL文件管理
+- **位置**: `paxl/sql/init.sql`
+- **内容**: 表结构 + 字段注释 + 索引 + 初始化数据
+- **更新**: 新增表时同步更新SQL文件
+
+### 接口文档管理
+- **位置**: `paxl/api/`
+- **格式**: Markdown文档
+- **内容**: 接口路径、请求方法、请求参数、响应参数、请求示例、响应示例
+- **更新**: 新增/修改接口时同步更新文档
+
+### 接口文档模板
+```markdown
+## 接口名称
+
+### 接口信息
+- 接口路径：`/api/xxx/xxx`
+- 请求方法：GET/POST
+- 接口描述：接口功能说明
+
+### 请求参数
+| 参数名 | 类型 | 必填 | 说明 |
+|-------|------|-----|------|
+| id | Long | 是 | 主键ID |
+
+### 响应参数
+| 参数名 | 类型 | 说明 |
+|-------|------|------|
+| id | Long | 主键ID |
+| name | String | 名称 |
+
+### 请求示例
+```json
+{
+  "name": "测试"
+}
+```
+
+### 响应示例
+```json
+{
+  "id": 1,
+  "name": "测试"
+}
+```
+```
+
+---
+
+## 关键规范
+
+### 命名规范
+- **Java类名**: UpperCamelCase（UserService、BannerController）
+- **Java方法/变量**: lowerCamelCase（getUserInfo、userId）
+- **Java常量**: 全大写+下划线（MAX_RETRY_COUNT）
+- **Java包名**: 小写+点分隔（com.my.family.paxl.service）
+- **数据库表名**: 小写+下划线（t_user、t_banner）
+- **数据库字段名**: 小写+下划线（user_name、create_time）
+- **小程序页面/组件**: kebab-case（navigation-bar、user-info）
+- **小程序样式类名**: kebab-case（header-title、card-container）
+
+### 注释规范（后端）
+- **类注释**: 必须包含@author（ai）、@date（yyyy/MM/dd）和业务说明
+- **方法注释**: 必须使用Javadoc说明功能、参数、返回值
+- **属性注释**: 必须说明业务含义
+
+### 注释规范（前端）
+- **页面方法**: 必须包含功能说明
+- **生命周期函数**: 必须包含标准注释
+- **复杂逻辑**: 必须添加注释说明
+
+### 日志规范（后端）
+- **格式**: `log.info("[MethodName] 描述, param={}", param)`
+- **业务标识**: 使用[MethodName]标识业务方法
+- **占位符**: 使用{}占位符，不使用字符串拼接
+- **日志级别**:
+  - info：正常业务流程
+  - warn：参数校验失败、业务告警
+  - error：系统异常、业务异常
+
+### 日志规范（前端）
+- **格式**: `console.log('描述:', data)`
+- **生产环境**: 可考虑关闭console.log，保留console.error
+- **敏感信息**: 不要打印用户密码等敏感信息
+
+### 异常处理（后端）
+- ✅ Service层记录异常日志: `log.error("[Method] 失败, param={}", param, e)`
+- ✅ Controller层统一处理异常，返回ResponseEntity
+- ❌ 禁止吞掉异常，必须处理或向上抛出
+
+### 异常处理（前端）
+- ✅ 网络请求必须有fail回调
+- ✅ 错误信息使用wx.showToast()显示
+- ✅ console.error()记录错误详情
+
+### 禁止事项
+- ❌ 禁止魔法值（未定义的常量）
+- ❌ 禁止循环中进行数据库操作
+- ❌ 禁止使用System.out.println()，必须使用log
+- ❌ 禁止类、方法、重要属性没有注释
+- ❌ 禁止使用MyBatis Plus的自动SQL方法，必须手写SQL
+- ❌ 禁止使用内联样式（前端）
+- ❌ 禁止在小程序中存储敏感信息
+
+### 必须事项
+- ✅ 后端所有Service类使用@Slf4j注解
+- ✅ 后端所有日志包含[MethodName]标识
+- ✅ 新增表必须更新SQL文档
+- ✅ 新增接口必须更新接口文档
+- ✅ Entity必须实现Serializable
+- ✅ 所有数据库操作SQL必须手写在Mapper XML中
+- ✅ 小程序页面必须包含完整的生命周期函数
+- ✅ 小程序网络请求必须有错误处理
+- ✅ 小程序wx:for必须使用wx:key
+
+---
+
+## 代码检查清单
+
+### 后端新增表开发
+- [ ] SQL已添加到`paxl/sql/init.sql`
+- [ ] Entity已创建，包含完整的注释
+- [ ] Mapper已创建，继承BaseMapper
+- [ ] Mapper XML已创建，namespace正确，所有SQL手写
+- [ ] Service接口和实现已创建
+- [ ] Service方法添加@Transactional注解
+- [ ] Controller已创建，包含完整的异常处理
+- [ ] 接口文档已更新到`paxl/api/`
+
+### 后端新增接口开发
+- [ ] 接口路径符合RESTful规范
+- [ ] 所有方法有完整注释
+- [ ] 日志包含[MethodName]标识
+- [ ] Controller层有完整的参数校验
+- [ ] Controller层有统一异常处理
+- [ ] 无魔法值，常量已定义
+- [ ] 所有SQL已手写在Mapper XML中
+- [ ] 接口文档已更新
+
+### 前端新增页面开发
+- [ ] 页面目录包含完整的js、wxml、wxss、json文件
+- [ ] data中定义了所有使用的变量
+- [ ] 生命周期函数有完整注释
+- [ ] wx:for使用了wx:key
+- [ ] 事件处理函数命名清晰
+- [ ] 网络请求有错误处理
+- [ ] 样式使用rpx单位
+- [ ] 遵循微信小程序设计规范
+
+---
+
+## 打包部署
+
+### 后端打包
+```bash
+# 进入项目目录
+cd MyFamilyBack/paxl
+
+# 打包
+mvn clean package
+
+# 运行
+java -jar target/paxl-0.0.1-SNAPSHOT.jar
+```
+
+### 前端发布
+1. 在微信开发者工具中点击"上传"
+2. 填写版本号和项目备注
+3. 登录微信公众平台提交审核
+4. 审核通过后发布
+
+---
+
+## 总结
+
+**开发时记住3个核心**：
+1. **架构**: 前端在MyFamilyWeb，后端在MyFamilyBack/paxl
+2. **规范**: 前端遵循微信小程序规范，后端遵循Spring Boot最佳实践
+3. **文档**: 及时更新SQL文档和接口文档
+
+**遵循本规范，确保代码质量和项目可维护性！**

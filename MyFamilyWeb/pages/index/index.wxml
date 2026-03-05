@@ -1,0 +1,80 @@
+<!--pages/index/index.wxml-->
+<view class="container">
+  <!-- 顶部标题区域 -->
+  <view class="header">
+    <view class="title">积善之家必有余庆</view>
+    <view class="subtitle">
+      <text>一起走过的 </text>
+      <text class="days-num">{{togetherDays}}</text>
+      <text> 天</text>
+    </view>
+  </view>
+  
+  <!-- 最近回忆 -->
+  <view class="memories-section">
+    <view class="section-title">最近回忆</view>
+    <view class="memories-carousel">
+      <swiper class="swiper" indicator-dots="{{true}}" autoplay="{{true}}" interval="{{3000}}" duration="{{500}}" circular="{{true}}" indicator-color="rgba(255,255,255,0.5)" indicator-active-color="#fff">
+        <swiper-item wx:for="{{memoryImages}}" wx:key="index">
+          <image class="memory-image" src="{{item}}" mode="aspectFill"></image>
+        </swiper-item>
+        <!-- 占位图，等待接口数据 -->
+        <swiper-item wx:if="{{memoryImages.length === 0}}">
+          <view class="memory-placeholder">
+            <text>暂无回忆</text>
+            <text class="placeholder-tip">稍后将从接口加载...</text>
+          </view>
+        </swiper-item>
+      </swiper>
+    </view>
+  </view>
+  
+  <!-- 功能菜单 -->
+  <view class="menu-section">
+    <view class="menu-item" bindtap="navigateToLove">
+      <view class="menu-icon love-icon">
+        <image class="icon-svg" src="../static/love.svg" mode="aspectFit"></image>
+      </view>
+      <view class="menu-content">
+        <view class="menu-title">执子之手</view>
+        <view class="menu-desc">记录我们的相识相恋</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    
+    <view class="menu-item" bindtap="navigateToHome">
+      <view class="menu-icon home-icon">
+        <image class="icon-svg" src="../static/home.svg" mode="aspectFit"></image>
+      </view>
+      <view class="menu-content">
+        <view class="menu-title">平安喜乐</view>
+        <view class="menu-desc">记录大家庭的点点滴滴</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    
+    <view class="menu-item" bindtap="navigateToImportant">
+      <view class="menu-icon important-icon">
+        <image class="icon-svg" src="../static/import.svg" mode="aspectFit"></image>
+      </view>
+      <view class="menu-content">
+        <view class="menu-title">重要事项</view>
+        <view class="menu-desc">家庭年度提醒与记录</view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+  
+  <!-- 底部导航栏 -->
+  <view class="bottom-nav">
+    <view class="nav-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+      <image class="nav-icon" src="../static/home.svg" mode="aspectFit"></image>
+      <text class="nav-text">首页</text>
+    </view>
+    <view class="nav-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+      <view class="nav-icon-text">👤</view>
+      <text class="nav-text">我的</text>
+    </view>
+  </view>
+</view>
+

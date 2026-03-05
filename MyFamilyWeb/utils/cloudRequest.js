@@ -1,0 +1,124 @@
+/**
+ * 云托管网络请求封装
+ * 统一管理云托管的HTTP请求
+ */
+
+const config = require('./config.js');
+
+/**
+ * 云托管请求方法
+ * @param {Object} options 请求配置
+ * @param {String} options.path 请求路径（如：/banner/list）
+ * @param {String} options.method 请求方法（GET、POST等）
+ * @param {Object} options.data 请求数据
+ * @param {Object} options.header 请求头（可选）
+ * @param {String} options.dataType 返回数据类型（json、other等）
+ * @param {String} options.responseType 响应类型（text、arraybuffer等）
+ * @return {Promise} 返回Promise对象
+ */
+function cloudRequest(options) {
+  return new Promise((resolve, reject) => {
+    // 构建完整路径
+    const fullPath = `${config.apiBasePath}${options.path}`;
+    
+    // 默认请求头
+    const defaultHeader = {
+      'X-WX-SERVICE': config.serviceName,
+      'content-type': 'application/json'
+    };
+
+    // 合并请求头
+    const header = Object.assign({}, defaultHeader, options.header || {});
+
+    console.log(`[CloudRequest] 开始请求: ${options.method} ${fullPath}`);
+
+    wx.cloud.callContainer({
+      config: {
+        env: config.cloudEnv
+      },
+      path: fullPath,
+      method: options.method || 'GET',
+      data: options.data || '',
+      header: header,
+      dataType: options.dataType || 'json',
+      responseType: options.responseType || 'text',
+      success: (res) => {
+        console.log(`[CloudRequest] 请求成功: ${fullPath}, 状态码: ${res.statusCode}`);
+        if (res.statusCode === 200) {
+          resolve(res.data);
+        } else {
+          console.error(`[CloudRequest] 请求失败: ${fullPath}, 状态码: ${res.statusCode}`);
+          reject({
+            code: res.statusCode,
+            message: '请求失败',
+            data: res.data
+          });
+        }
+      },
+      fail: (err) => {
+        console.error(`[CloudRequest] 请求异常: ${fullPath}`, err);
+        reject({
+          code: -1,
+          message: err.errMsg || '网络请求失败',
+          error: err
+        });
+      }
+    });
+  });
+}
+
+/**
+ * GET请求
+ * @param {String} path 请求路径
+ * @param {Object} params 查询参数（可选）
+ * @return {Promise}
+ */
+function get(path, params) {
+  // 将参数拼接到URL中
+  if (params && Object.keys(params).length > 0) {
+    const query = Object.keys(params)
+      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      .join('&');
+    path = `${path}?${query}`;
+  }
+
+  return cloudRequest({
+    path: path,
+    method: 'GET'
+  });
+}
+
+/**
+ * POST请求
+ * @param {String} path 请求路径
+ * @param {Object} data 请求数据
+ * @return {Promise}
+ */
+function post(path, data) {
+  return cloudRequest({
+    path: path,
+    method: 'POST',
+    data: data
+  });
+}
+
+/**
+ * 获取图片（返回ArrayBuffer）
+ * @param {String} path 请求路径
+ * @return {Promise}
+ */
+function getImage(path) {
+  return cloudRequest({
+    path: path,
+    method: 'GET',
+    dataType: 'other',
+    responseType: 'arraybuffer'
+  });
+}
+
+module.exports = {
+  cloudRequest,
+  get,
+  post,
+  getImage
+};
