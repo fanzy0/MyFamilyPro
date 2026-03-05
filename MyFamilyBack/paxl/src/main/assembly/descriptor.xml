@@ -1,0 +1,66 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.1.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.1.0 https://maven.apache.org/xsd/assembly-2.1.0.xsd">
+    <id>deploy</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+
+    <!-- 包含基础目录结构 -->
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <!-- 1. 文件集：业务JAR包、配置文件、启动脚本 -->
+    <fileSets>
+        <!-- 业务JAR包：Spring Boot打包后的可执行JAR -->
+        <fileSet>
+            <!-- 输出目录 这里指的是maven的target目录 -->
+            <directory>${project.build.directory}</directory>
+            <!-- 目标目录，/表示归档文件的根目录 -->
+            <outputDirectory>/</outputDirectory>
+            <!-- 匹配 -->
+            <includes>
+                <include>${project.build.finalName}.jar</include>
+            </includes>
+            <!-- 排除 -->
+            <excludes>
+                <exclude>*-sources.jar</exclude>
+                <exclude>*-javadoc.jar</exclude>
+                <exclude>original-*.jar</exclude>
+            </excludes>
+        </fileSet>
+
+        <!-- 配置文件 (resources) -->
+        <fileSet>
+            <directory>src/main/resources</directory>
+            <outputDirectory>resources</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+
+        <!-- 启动脚本 (bin) -->
+        <fileSet>
+            <directory>src/main/assembly/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+            <includes>
+                <include>start.sh</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+
+    <!-- 2. 依赖集：将所有依赖放入 lib/ -->
+    <dependencySets>
+        <!-- 第三方依赖 JAR -->
+        <dependencySet>
+            <!-- 将所有的依赖放到目录lib下 -->
+            <outputDirectory>lib</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <scope>runtime</scope>
+            <!-- 排除项目自身 -->
+            <excludes>
+                <exclude>${project.groupId}:${project.artifactId}</exclude>
+            </excludes>
+        </dependencySet>
+    </dependencySets>
+</assembly>
