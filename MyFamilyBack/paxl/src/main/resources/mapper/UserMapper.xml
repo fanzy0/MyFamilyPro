@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.UserMapper">
+
+    <!-- 基础结果映射 -->
+    <resultMap id="BaseResultMap" type="com.my.family.paxl.domain.entity.UserDO">
+        <id     column="id"              property="id"/>
+        <result column="openid"          property="openid"/>
+        <result column="unionid"         property="unionid"/>
+        <result column="nickname"        property="nickname"/>
+        <result column="avatar_url"      property="avatarUrl"/>
+        <result column="mobile"          property="mobile"/>
+        <result column="status"          property="status"/>
+        <result column="last_login_time" property="lastLoginTime"/>
+        <result column="create_time"     property="createTime"/>
+        <result column="update_time"     property="updateTime"/>
+    </resultMap>
+
+    <!-- 通用查询列 -->
+    <sql id="BaseColumns">
+        id, openid, unionid, nickname, avatar_url, mobile, status,
+        last_login_time, create_time, update_time
+    </sql>
+
+    <!-- 根据 openid 查询用户 -->
+    <select id="selectByOpenid" resultMap="BaseResultMap">
+        SELECT
+            <include refid="BaseColumns"/>
+        FROM mf_user
+        WHERE openid = #{openid}
+        LIMIT 1
+    </select>
+
+    <!-- 根据主键 ID 查询用户 -->
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT
+            <include refid="BaseColumns"/>
+        FROM mf_user
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mf_user (
+            openid,
+            status,
+            last_login_time,
+            create_time,
+            update_time
+        ) VALUES (
+            #{openid},
+            #{status},
+            #{lastLoginTime},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <!-- 更新最近登录时间 -->
+    <update id="updateLastLoginTime">
+        UPDATE mf_user
+        SET last_login_time = #{lastLoginTime},
+            update_time     = #{updateTime}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 更新用户基础资料，仅更新非空字段 -->
+    <update id="updateProfile">
+        UPDATE mf_user
+        <set>
+            <if test="nickname != null and nickname != ''">
+                nickname = #{nickname},
+            </if>
+            <if test="avatarUrl != null and avatarUrl != ''">
+                avatar_url = #{avatarUrl},
+            </if>
+            update_time = #{updateTime}
+        </set>
+        WHERE id = #{id}
+    </update>
+
+</mapper>

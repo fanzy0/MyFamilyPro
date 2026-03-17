@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "成员审批",
+  "navigationBarBackgroundColor": "#b8d4e8",
+  "navigationBarTextStyle": "black",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true
+}

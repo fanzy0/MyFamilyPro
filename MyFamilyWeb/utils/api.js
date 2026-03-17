@@ -2,7 +2,7 @@
  * Banner（轮播图）相关API接口
  */
 
-const { get, getImage } = require('../utils/cloudRequest.js');
+const { get, getImage } = require('../utils/request.js');
 
 /**
  * 获取轮播图列表
@@ -27,7 +27,7 @@ function getBannerImage(imagePath) {
  * @return {Promise}
  */
 function saveBanner(bannerData) {
-  const { post } = require('../utils/cloudRequest.js');
+  const { post } = require('../utils/request.js');
   return post('/banner/save', bannerData);
 }
 
@@ -37,7 +37,7 @@ function saveBanner(bannerData) {
  * @return {Promise}
  */
 function deleteBanner(bannerId) {
-  const { post } = require('../utils/cloudRequest.js');
+  const { post } = require('../utils/request.js');
   return post('/banner/delete', { bannerId });
 }
 

@@ -1,6 +1,12 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/login/login",
+    "pages/index/index",
+    "pages/family/guide/guide",
+    "pages/family/create/create",
+    "pages/family/join/join",
+    "pages/family/approve/approve",
+    "pages/family/home/home"
   ],
   "window": {
     "navigationBarTextStyle": "black",

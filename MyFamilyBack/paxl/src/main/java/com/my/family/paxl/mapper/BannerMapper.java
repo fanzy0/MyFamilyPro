@@ -49,11 +49,12 @@ public interface BannerMapper extends BaseMapper<BannerDO> {
     Long selectMaxBannerId();
 
     /**
-     * 查询所有启用的轮播图片，按位置排序
+     * 查询指定家庭下所有启用的轮播图片，按位置排序
      *
+     * @param familyId 家庭ID
      * @return 轮播图片列表
      */
-    List<BannerDO> selectEnabledBanners();
+    List<BannerDO> selectEnabledBanners(@Param("familyId") Long familyId);
 
     /**
      * 根据主键ID逻辑删除轮播图片

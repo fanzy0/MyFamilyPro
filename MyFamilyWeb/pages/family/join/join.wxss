@@ -1,0 +1,229 @@
+/* pages/family/join/join.wxss */
+
+page {
+  background: linear-gradient(160deg, #b8d4e8 0%, #d8e8f0 40%, #e8f4fd 100%);
+  min-height: 100vh;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 48rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部标题区 */
+.header-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 64rpx;
+}
+
+.header-icon-wrap {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 30rpx;
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(255, 167, 38, 0.2);
+}
+
+.header-icon {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  color: #6b7c8d;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 表单卡片 */
+.form-section {
+  width: 100%;
+  margin-bottom: 32rpx;
+}
+
+.form-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx 40rpx;
+  box-sizing: border-box;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.field-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 24rpx;
+  letter-spacing: 1rpx;
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+}
+
+.field-input {
+  flex: 1;
+  height: 80rpx;
+  font-size: 32rpx;
+  color: #2c3e50;
+  box-sizing: border-box;
+}
+
+.field-placeholder {
+  color: #c0cdd8;
+  font-size: 30rpx;
+}
+
+.field-line {
+  width: 100%;
+  height: 2rpx;
+  background: #e8edf2;
+  margin-bottom: 32rpx;
+}
+
+/* 查询按钮（次要按钮样式） */
+.query-btn {
+  width: 100%;
+  height: 84rpx;
+  background: rgba(79, 172, 254, 0.12);
+  border: 2rpx solid rgba(79, 172, 254, 0.4);
+  border-radius: 42rpx;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.query-btn::after {
+  border: none;
+}
+
+.query-btn-loading {
+  background: rgba(192, 205, 216, 0.1);
+  border-color: rgba(192, 205, 216, 0.3);
+}
+
+.query-btn-text {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #3d9ae8;
+  letter-spacing: 1rpx;
+}
+
+.query-btn-loading .query-btn-text {
+  color: #9fb3c2;
+}
+
+/* 预览卡片区 */
+.preview-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 24rpx;
+  padding: 36rpx 40rpx;
+  box-sizing: border-box;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+  margin-bottom: 32rpx;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 28rpx;
+}
+
+.preview-tag {
+  font-size: 22rpx;
+  color: #3d9ae8;
+  background: rgba(79, 172, 254, 0.12);
+  padding: 6rpx 20rpx;
+  border-radius: 20rpx;
+  letter-spacing: 1rpx;
+}
+
+.preview-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 0;
+}
+
+.preview-label {
+  font-size: 28rpx;
+  color: #7f8fa6;
+}
+
+.preview-value {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.preview-divider {
+  height: 2rpx;
+  background: #f0f4f8;
+  margin: 8rpx 0;
+}
+
+.preview-tip {
+  display: block;
+  font-size: 24rpx;
+  color: #9fb3c2;
+  margin-top: 24rpx;
+  text-align: center;
+}
+
+/* 主操作按钮 */
+.primary-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #4facfe 0%, #3d9ae8 100%);
+  border-radius: 48rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(79, 172, 254, 0.4);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary-btn::after {
+  border: none;
+}
+
+.primary-btn-loading {
+  background: linear-gradient(135deg, #a0c8f0 0%, #8ab8e0 100%);
+  box-shadow: none;
+}
+
+.btn-text {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 2rpx;
+}

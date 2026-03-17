@@ -16,9 +16,25 @@ Page({
    * 生命周期函数--监听页面加载
    */
   onLoad(options) {
+    if (!this._checkLogin()) return;
     this.calculateDays();
     // 加载回忆图片
     this.loadMemoryImages();
+  },
+
+  /**
+   * 登录守卫：校验用户是否已登录
+   * 若 authChecked 为 true 且 isLoggedIn 为 false，跳转登录页
+   * @return {Boolean} 是否已登录
+   */
+  _checkLogin() {
+    const app = getApp();
+    if (app.globalData.authChecked && !app.globalData.isLoggedIn) {
+      console.log('[Index] 用户未登录，跳转登录页');
+      wx.redirectTo({ url: '/pages/login/login' });
+      return false;
+    }
+    return true;
   },
 
   /**

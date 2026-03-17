@@ -1,0 +1,268 @@
+/* pages/family/guide/guide.wxss */
+
+page {
+  background: linear-gradient(160deg, #b8d4e8 0%, #d8e8f0 40%, #e8f4fd 100%);
+  min-height: 100vh;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 48rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部标题区 */
+.header-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 56rpx;
+}
+
+.logo-circle {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #5eb8ff 0%, #4facfe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(79, 172, 254, 0.4);
+  margin-bottom: 30rpx;
+}
+
+.logo-text {
+  font-size: 68rpx;
+  color: #fff;
+  font-weight: bold;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  letter-spacing: 2rpx;
+  margin-bottom: 14rpx;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  text-align: center;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  color: #6b7c8d;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 已有家庭区块 */
+.section-block {
+  width: 100%;
+  margin-bottom: 32rpx;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #7f8fa6;
+  letter-spacing: 1rpx;
+}
+
+.loading-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #4facfe;
+  margin-left: 12rpx;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.family-item {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 22rpx;
+  padding: 36rpx 32rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3rpx 14rpx rgba(0, 0, 0, 0.07);
+  margin-bottom: 16rpx;
+  transition: all 0.15s ease;
+}
+
+.family-item:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 图标区：与 action-card 保持一致的圆角方块 */
+.family-item-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #f5d8e0 0%, #edb8c4 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 28rpx;
+}
+
+.family-item-icon {
+  font-size: 40rpx;
+  line-height: 1;
+}
+
+.family-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.family-item-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8rpx;
+  letter-spacing: 1rpx;
+}
+
+.family-item-meta {
+  font-size: 24rpx;
+  color: #7f8fa6;
+  line-height: 1.5;
+}
+
+.family-item-arrow {
+  font-size: 44rpx;
+  color: #c0cdd8;
+  font-weight: 300;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+/* 分隔线 */
+.divider-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  margin-bottom: 28rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 2rpx;
+  background: rgba(192, 205, 216, 0.5);
+}
+
+.divider-text {
+  font-size: 24rpx;
+  color: #9fb3c2;
+  padding: 0 20rpx;
+  flex-shrink: 0;
+}
+
+/* 功能卡片区 */
+.card-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  margin-bottom: 48rpx;
+}
+
+.action-card {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 22rpx;
+  padding: 36rpx 32rpx;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 3rpx 14rpx rgba(0, 0, 0, 0.07);
+  transition: all 0.15s ease;
+}
+
+.action-card:active {
+  transform: scale(0.98);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+}
+
+.card-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 28rpx;
+}
+
+.card-icon-primary {
+  background: linear-gradient(135deg, #e8f4ff 0%, #cce5ff 100%);
+}
+
+.card-icon-secondary {
+  background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+}
+
+.card-icon {
+  font-size: 40rpx;
+  line-height: 1;
+}
+
+.card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8rpx;
+  letter-spacing: 1rpx;
+}
+
+.card-desc {
+  font-size: 24rpx;
+  color: #7f8fa6;
+  line-height: 1.5;
+}
+
+.card-arrow {
+  font-size: 44rpx;
+  color: #c0cdd8;
+  font-weight: 300;
+  flex-shrink: 0;
+  margin-left: 12rpx;
+}
+
+/* 底部提示 */
+.footer-tip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tip-text {
+  font-size: 22rpx;
+  color: #9fb3c2;
+  text-align: center;
+}

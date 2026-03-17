@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "家庭主页",
+  "navigationBarBackgroundColor": "#b8d4e8",
+  "navigationBarTextStyle": "black",
+  "navigationStyle": "custom",
+  "enablePullDownRefresh": true
+}

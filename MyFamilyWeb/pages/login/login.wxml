@@ -1,0 +1,57 @@
+<!--pages/login/login.wxml-->
+<view class="container">
+
+  <!-- 自动登录校验中的 loading 遮罩 -->
+  <view class="loading-mask" wx:if="{{loading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 登录主体内容 -->
+  <view class="login-body" wx:if="{{!loading}}">
+
+    <!-- Logo 与标题区域 -->
+    <view class="logo-section">
+      <view class="logo-circle">
+        <text class="logo-text">家</text>
+      </view>
+      <text class="app-name">我们的家</text>
+      <text class="app-slogan">积善之家，必有余庆</text>
+    </view>
+
+    <!-- 功能简介 -->
+    <view class="features-section">
+      <view class="feature-item">
+        <text class="feature-icon">📅</text>
+        <text class="feature-desc">记录家庭重要事项，按时提醒</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">👨‍👩‍👧‍👦</text>
+        <text class="feature-desc">一个家庭，共同管理，共同记录</text>
+      </view>
+      <view class="feature-item">
+        <text class="feature-icon">🔔</text>
+        <text class="feature-desc">节日纪念日，微信消息准时提醒</text>
+      </view>
+    </view>
+
+    <!-- 登录按钮区域 -->
+    <view class="login-section">
+      <button
+        class="login-btn {{loginLoading ? 'login-btn-loading' : ''}}"
+        bindtap="onLoginTap"
+        disabled="{{loginLoading}}"
+      >
+        <view class="btn-content">
+          <text class="wechat-icon" wx:if="{{!loginLoading}}">微信</text>
+          <text class="btn-text">{{loginLoading ? '登录中...' : '微信一键登录'}}</text>
+        </view>
+      </button>
+      <text class="login-tips">登录即代表同意《用户协议》和《隐私政策》</text>
+    </view>
+
+  </view>
+
+</view>

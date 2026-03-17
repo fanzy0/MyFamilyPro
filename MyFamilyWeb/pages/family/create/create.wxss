@@ -1,0 +1,190 @@
+/* pages/family/create/create.wxss */
+
+page {
+  background: linear-gradient(160deg, #b8d4e8 0%, #d8e8f0 40%, #e8f4fd 100%);
+  min-height: 100vh;
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 48rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部标题区 */
+.header-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 72rpx;
+}
+
+.header-icon-wrap {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 30rpx;
+  background: linear-gradient(135deg, #e8f4ff 0%, #cce5ff 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+  box-shadow: 0 4rpx 16rpx rgba(79, 172, 254, 0.2);
+}
+
+.header-icon {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 16rpx;
+  letter-spacing: 2rpx;
+  font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+}
+
+.page-subtitle {
+  font-size: 26rpx;
+  color: #6b7c8d;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* 表单卡片 */
+.form-section {
+  width: 100%;
+  margin-bottom: 60rpx;
+}
+
+.form-card {
+  background: rgba(255, 255, 255, 0.88);
+  border-radius: 24rpx;
+  padding: 48rpx 40rpx 36rpx;
+  box-sizing: border-box;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.07);
+}
+
+.field-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 24rpx;
+  letter-spacing: 1rpx;
+}
+
+.field-input {
+  width: 100%;
+  height: 80rpx;
+  font-size: 32rpx;
+  color: #2c3e50;
+  box-sizing: border-box;
+}
+
+.field-placeholder {
+  color: #c0cdd8;
+  font-size: 30rpx;
+}
+
+.field-line {
+  width: 100%;
+  height: 2rpx;
+  background: #e8edf2;
+  margin-bottom: 20rpx;
+}
+
+.field-tip {
+  font-size: 22rpx;
+  color: #9fb3c2;
+  line-height: 1.5;
+}
+
+/* 字段间距 */
+.field-spacer {
+  height: 36rpx;
+}
+
+/* 选填标签 */
+.field-optional {
+  font-size: 22rpx;
+  font-weight: 400;
+  color: #9fb3c2;
+  margin-left: 8rpx;
+}
+
+/* 日期选择器行 */
+.date-picker-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80rpx;
+}
+
+.date-value {
+  font-size: 32rpx;
+  color: #2c3e50;
+  flex: 1;
+}
+
+.date-placeholder {
+  font-size: 30rpx;
+  color: #c0cdd8;
+  flex: 1;
+}
+
+.date-actions {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex-shrink: 0;
+}
+
+.date-clear {
+  font-size: 26rpx;
+  color: #c0cdd8;
+  padding: 4rpx 10rpx;
+}
+
+.date-arrow {
+  font-size: 40rpx;
+  color: #c0cdd8;
+  font-weight: 300;
+}
+
+/* 操作区 */
+.action-section {
+  width: 100%;
+}
+
+.primary-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #4facfe 0%, #3d9ae8 100%);
+  border-radius: 48rpx;
+  border: none;
+  box-shadow: 0 8rpx 24rpx rgba(79, 172, 254, 0.4);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.primary-btn::after {
+  border: none;
+}
+
+.primary-btn-loading {
+  background: linear-gradient(135deg, #a0c8f0 0%, #8ab8e0 100%);
+  box-shadow: none;
+}
+
+.btn-text {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 2rpx;
+}

@@ -9,14 +9,15 @@
     -->
     <resultMap id="BannerResultMap" type="com.my.family.paxl.domain.entity.BannerDO">
         <id column="id" property="id"/>
-        <result column="banner_id" property="bannerId"/>
-        <result column="image_path" property="imagePath"/>
-        <result column="position" property="position"/>
-        <result column="title" property="title"/>
+        <result column="banner_id"   property="bannerId"/>
+        <result column="family_id"   property="familyId"/>
+        <result column="image_path"  property="imagePath"/>
+        <result column="position"    property="position"/>
+        <result column="title"       property="title"/>
         <result column="description" property="description"/>
-        <result column="link_url" property="linkUrl"/>
-        <result column="status" property="status"/>
-        <result column="deleted" property="deleted"/>
+        <result column="link_url"    property="linkUrl"/>
+        <result column="status"      property="status"/>
+        <result column="deleted"     property="deleted"/>
         <result column="create_time" property="createTime"/>
         <result column="update_time" property="updateTime"/>
     </resultMap>
@@ -25,7 +26,7 @@
       通用查询字段
     -->
     <sql id="Base_Column_List">
-        id, banner_id, image_path, position, title, description, link_url, status, deleted, create_time, update_time
+        id, banner_id, family_id, image_path, position, title, description, link_url, status, deleted, create_time, update_time
     </sql>
 
     <!--
@@ -33,9 +34,9 @@
     -->
     <insert id="insert" parameterType="com.my.family.paxl.domain.entity.BannerDO" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_banner (
-            banner_id, image_path, position, title, description, link_url, status, deleted, create_time, update_time
+            banner_id, family_id, image_path, position, title, description, link_url, status, deleted, create_time, update_time
         ) VALUES (
-            #{bannerId}, #{imagePath}, #{position}, #{title}, #{description}, #{linkUrl}, #{status}, #{deleted}, #{createTime}, #{updateTime}
+            #{bannerId}, #{familyId}, #{imagePath}, #{position}, #{title}, #{description}, #{linkUrl}, #{status}, #{deleted}, #{createTime}, #{updateTime}
         )
     </insert>
 
@@ -98,14 +99,15 @@
     </select>
 
     <!--
-      查询所有启用的轮播图片，按位置排序
+      查询指定家庭下所有启用的轮播图片，按位置排序
     -->
     <select id="selectEnabledBanners" resultMap="BannerResultMap">
         SELECT
         <include refid="Base_Column_List"/>
         FROM t_banner
-        WHERE status = 1
-        AND deleted = 0
+        WHERE family_id = #{familyId}
+          AND status = 1
+          AND deleted = 0
         ORDER BY position ASC, create_time DESC
     </select>
 

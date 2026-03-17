@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.FamilyMapper">
+
+    <!-- 家庭表映射配置，表：mf_family -->
+    <resultMap id="FamilyResultMap" type="com.my.family.paxl.domain.entity.FamilyDO">
+        <id     column="id"            property="id"/>
+        <result column="family_name"   property="familyName"/>
+        <result column="family_code"   property="familyCode"/>
+        <result column="owner_user_id" property="ownerUserId"/>
+        <result column="member_count"  property="memberCount"/>
+        <result column="meet_date"     property="meetDate"/>
+        <result column="status"        property="status"/>
+        <result column="create_time"   property="createTime"/>
+        <result column="update_time"   property="updateTime"/>
+    </resultMap>
+
+    <!-- 通用查询字段 -->
+    <sql id="Family_Base_Columns">
+        id, family_name, family_code, owner_user_id, member_count, meet_date, status, create_time, update_time
+    </sql>
+
+    <!-- 新增家庭 -->
+    <insert id="insertFamily" parameterType="com.my.family.paxl.domain.entity.FamilyDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mf_family (
+            family_name,
+            family_code,
+            owner_user_id,
+            member_count,
+            meet_date,
+            status,
+            create_time,
+            update_time
+        ) VALUES (
+            #{familyName},
+            #{familyCode},
+            #{ownerUserId},
+            #{memberCount},
+            #{meetDate},
+            #{status},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <!-- 根据家庭编号查询家庭 -->
+    <select id="selectByFamilyCode" resultMap="FamilyResultMap">
+        SELECT
+        <include refid="Family_Base_Columns"/>
+        FROM mf_family
+        WHERE family_code = #{familyCode}
+        LIMIT 1
+    </select>
+
+    <!-- 根据主键ID查询家庭 -->
+    <select id="selectById" resultMap="FamilyResultMap">
+        SELECT
+        <include refid="Family_Base_Columns"/>
+        FROM mf_family
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <!-- 成员数量 +1 -->
+    <update id="incrementMemberCount">
+        UPDATE mf_family
+        SET member_count = member_count + 1,
+            update_time  = NOW()
+        WHERE id = #{familyId}
+    </update>
+
+</mapper>
+

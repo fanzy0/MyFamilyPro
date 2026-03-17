@@ -15,28 +15,32 @@ public interface BannerService {
 
     /**
      * 保存轮播图片
-     * 用户上传图片后，调用此接口保存图片信息到数据库
+     * 会校验当前用户是否为 bannerDO.familyId 对应家庭的 APPROVED 成员
      *
-     * @param bannerDO 轮播图片数据对象，必须包含imagePath
+     * @param bannerDO 轮播图片数据对象，必须包含 imagePath 和 familyId
+     * @param userId   当前操作用户ID，来自 UserContext
      * @return 保存后的轮播图片对象
      */
-    BannerDO saveBanner(BannerDO bannerDO);
+    BannerDO saveBanner(BannerDO bannerDO, Long userId);
 
     /**
      * 删除轮播图片
-     * 逻辑删除，同时删除关联的评论
+     * 逻辑删除，会校验当前用户是否为该 banner 所属家庭的 APPROVED 成员
      *
      * @param bannerId 轮播图ID，业务编号
+     * @param userId   当前操作用户ID，来自 UserContext
      */
-    void deleteBanner(Long bannerId);
+    void deleteBanner(Long bannerId, Long userId);
 
     /**
-     * 查询所有启用的轮播图片
-     * 返回图片元素信息，不包含图片内容
+     * 查询指定家庭下所有启用的轮播图片
+     * 会校验当前用户是否为该家庭的 APPROVED 成员
      *
+     * @param familyId 家庭ID
+     * @param userId   当前操作用户ID，来自 UserContext
      * @return 轮播图片列表，按位置排序
      */
-    List<BannerDO> listEnabledBanners();
+    List<BannerDO> listEnabledBanners(Long familyId, Long userId);
 
     /**
      * 根据轮播图ID查询轮播图片信息

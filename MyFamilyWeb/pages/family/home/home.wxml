@@ -1,0 +1,248 @@
+<!--pages/family/home/home.wxml-->
+<view class="container">
+
+  <!-- 加载中 -->
+  <view class="loading-mask" wx:if="{{loading}}">
+    <view class="loading-content">
+      <view class="loading-spinner"></view>
+      <text class="loading-text">加载中...</text>
+    </view>
+  </view>
+
+  <!-- 家庭主页内容 -->
+  <scroll-view class="home-body" scroll-y wx:elif="{{currentFamily}}">
+
+    <!-- 顶部头部区域（两个 Tab 均保留） -->
+    <view class="header-section">
+      <view class="header-overlay"></view>
+      <view class="header-content">
+        <text class="family-title">{{currentFamily.familyName}}</text>
+        <view class="together-days-wrap" wx:if="{{togetherDays !== null}}">
+          <text class="together-prefix">一起走过了 </text>
+          <text class="together-num">{{togetherDays}}</text>
+          <text class="together-suffix"> 天</text>
+        </view>
+        <text class="together-none" wx:else>记录每一个温馨时刻</text>
+      </view>
+    </view>
+
+    <!-- ===== 首页 Tab 内容 ===== -->
+    <view class="tab-content" wx:if="{{activeTab === 'home'}}">
+
+      <!-- 最近回忆 -->
+      <view class="memories-section">
+        <swiper
+          class="memory-swiper"
+          indicator-dots="{{memoryImages.length > 1}}"
+          autoplay="{{memoryImages.length > 1}}"
+          interval="{{3000}}"
+          duration="{{500}}"
+          circular="{{true}}"
+          indicator-color="rgba(255,255,255,0.5)"
+          indicator-active-color="#fff"
+          bindchange="onMemorySwiperChange"
+        >
+          <swiper-item wx:for="{{memoryImages}}" wx:key="bannerId">
+            <image
+              class="memory-image"
+              src="{{item.src}}"
+              mode="aspectFill"
+            ></image>
+          </swiper-item>
+          <swiper-item wx:if="{{memoryImages.length === 0}}">
+            <view class="memory-placeholder">
+              <text class="placeholder-icon">🌸</text>
+              <text class="placeholder-text">暂无回忆，快去记录吧~</text>
+            </view>
+          </swiper-item>
+        </swiper>
+      </view>
+
+      <!-- 功能菜单 -->
+      <view class="menu-section">
+
+        <!-- 执子之手 -->
+        <view class="menu-item" bindtap="navigateToLove">
+          <view class="menu-icon-wrap love-bg">
+            <text class="menu-icon-emoji">❤️</text>
+          </view>
+          <view class="menu-content">
+            <text class="menu-title">执子之手</text>
+            <text class="menu-desc">记录我们的相识相恋</text>
+          </view>
+          <text class="menu-arrow">›</text>
+        </view>
+
+        <!-- 平安喜乐 -->
+        <view class="menu-item" bindtap="navigateToHome">
+          <view class="menu-icon-wrap home-bg">
+            <text class="menu-icon-emoji">🏠</text>
+          </view>
+          <view class="menu-content">
+            <text class="menu-title">平安喜乐</text>
+            <text class="menu-desc">记录大家庭的点点滴滴</text>
+          </view>
+          <text class="menu-arrow">›</text>
+        </view>
+
+        <!-- 重要事项 -->
+        <view class="menu-item" bindtap="navigateToImportant">
+          <view class="menu-icon-wrap important-bg">
+            <text class="menu-icon-emoji">📋</text>
+          </view>
+          <view class="menu-content">
+            <text class="menu-title">重要事项</text>
+            <text class="menu-desc">家庭年度提醒与记录</text>
+          </view>
+          <text class="menu-arrow">›</text>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- ===== 我的 Tab 内容 ===== -->
+    <view class="tab-content" wx:if="{{activeTab === 'my'}}">
+
+      <!-- 家庭信息概览卡 -->
+      <view class="my-profile-card">
+        <view class="my-avatar">
+          <text class="my-avatar-icon">👤</text>
+        </view>
+        <view class="my-profile-info">
+          <text class="my-family-name">{{currentFamily.familyName}}</text>
+          <text class="my-role-text">{{currentFamily.role === 'OWNER' ? '户主' : '成员'}} · {{currentFamily.memberCount}} 位成员</text>
+        </view>
+      </view>
+
+      <!-- 我的功能列表 -->
+      <view class="my-list">
+
+        <!-- 信息修改 -->
+        <view class="my-group">
+          <view class="my-item" bindtap="onEditInfo">
+            <view class="my-item-icon edit-bg">✏️</view>
+            <view class="my-item-content">
+              <text class="my-item-title">信息修改</text>
+              <text class="my-item-desc">修改家庭名称、相遇时间等</text>
+            </view>
+            <text class="my-item-arrow">›</text>
+          </view>
+        </view>
+
+        <!-- 家庭切换 -->
+        <view class="my-group">
+          <view class="my-item" bindtap="onToggleFamilySwitch">
+            <view class="my-item-icon switch-bg">🔄</view>
+            <view class="my-item-content">
+              <text class="my-item-title">家庭切换</text>
+              <text class="my-item-desc">当前：{{currentFamily.familyName}}</text>
+            </view>
+            <text class="my-item-arrow {{showFamilySwitch ? 'arrow-rotate' : ''}}">›</text>
+          </view>
+          <!-- 家庭列表展开 -->
+          <view class="expand-panel" wx:if="{{showFamilySwitch}}">
+            <view
+              class="family-switch-item {{item.familyId === currentFamily.familyId ? 'family-switch-active' : ''}}"
+              wx:for="{{familyList}}"
+              wx:key="familyId"
+              bindtap="onSwitchFamily"
+              data-family-id="{{item.familyId}}"
+            >
+              <view class="radio-wrap">
+                <view class="radio-outer {{item.familyId === currentFamily.familyId ? 'radio-outer-checked' : ''}}">
+                  <view class="radio-inner" wx:if="{{item.familyId === currentFamily.familyId}}"></view>
+                </view>
+              </view>
+              <text class="family-switch-name">{{item.familyName}}</text>
+              <text class="family-switch-badge">{{item.role === 'OWNER' ? '户主' : '成员'}}</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 成员审批（仅户主） -->
+        <view class="my-group" wx:if="{{isOwner}}">
+          <view class="my-item" bindtap="onToggleApproval">
+            <view class="my-item-icon approve-bg">👥</view>
+            <view class="my-item-content">
+              <text class="my-item-title">成员审批</text>
+              <text class="my-item-desc">{{pendingMembers.length > 0 ? '有 ' + pendingMembers.length + ' 条待处理申请' : '暂无待审批申请'}}</text>
+            </view>
+            <view class="badge-wrap" wx:if="{{pendingMembers.length > 0 && !showApproval}}">
+              <text class="badge-dot">{{pendingMembers.length}}</text>
+            </view>
+            <text class="my-item-arrow {{showApproval ? 'arrow-rotate' : ''}}">›</text>
+          </view>
+          <!-- 审批列表展开 -->
+          <view class="expand-panel" wx:if="{{showApproval}}">
+            <view wx:if="{{approvLoading}}" class="approval-loading">
+              <text>加载中...</text>
+            </view>
+            <view wx:elif="{{pendingMembers.length === 0}}" class="approval-empty">
+              <text>暂无待审批成员 🎉</text>
+            </view>
+            <view class="approval-item" wx:for="{{pendingMembers}}" wx:key="familyMemberId">
+              <view class="approval-avatar">
+                <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" class="approval-avatar-img" mode="aspectFill"></image>
+                <text wx:else class="approval-avatar-text">{{item.nickname.substring(0,1)}}</text>
+              </view>
+              <view class="approval-info">
+                <text class="approval-name">{{item.nickname}}</text>
+                <text class="approval-time">{{item.applyTime}}</text>
+              </view>
+              <view class="approval-actions">
+                <view
+                  class="btn-approve"
+                  bindtap="onApprove"
+                  data-member-id="{{item.familyMemberId}}"
+                >通过</view>
+                <view
+                  class="btn-reject"
+                  bindtap="onReject"
+                  data-member-id="{{item.familyMemberId}}"
+                >拒绝</view>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 加入 / 创建家庭 -->
+        <view class="my-group">
+          <view class="my-item" bindtap="onAddFamilyTap">
+            <view class="my-item-icon add-bg">➕</view>
+            <view class="my-item-content">
+              <text class="my-item-title">加入 / 创建家庭</text>
+              <text class="my-item-desc">加入新家庭或创建自己的家庭</text>
+            </view>
+            <text class="my-item-arrow">›</text>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- 底部占位（防止内容被固定导航遮挡） -->
+    <view class="bottom-placeholder"></view>
+
+  </scroll-view>
+
+  <!-- 底部固定导航 -->
+  <view class="bottom-nav" wx:if="{{!loading && currentFamily}}">
+    <view
+      class="nav-item {{activeTab === 'home' ? 'nav-active' : ''}}"
+      bindtap="switchTab"
+      data-tab="home"
+    >
+      <text class="nav-emoji {{activeTab === 'home' ? 'nav-emoji-active' : ''}}">🏠</text>
+      <text class="nav-label">首页</text>
+    </view>
+    <view
+      class="nav-item {{activeTab === 'my' ? 'nav-active' : ''}}"
+      bindtap="switchTab"
+      data-tab="my"
+    >
+      <text class="nav-emoji {{activeTab === 'my' ? 'nav-emoji-active' : ''}}">👤</text>
+      <text class="nav-label">我的</text>
+    </view>
+  </view>
+
+</view>

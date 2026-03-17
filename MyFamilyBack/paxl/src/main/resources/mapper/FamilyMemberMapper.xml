@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.FamilyMemberMapper">
+
+    <!-- 家庭成员关系表映射配置，表：mf_family_member -->
+    <resultMap id="FamilyMemberResultMap" type="com.my.family.paxl.domain.entity.FamilyMemberDO">
+        <id     column="id"           property="id"/>
+        <result column="family_id"    property="familyId"/>
+        <result column="user_id"      property="userId"/>
+        <result column="role"         property="role"/>
+        <result column="join_status"  property="joinStatus"/>
+        <result column="join_time"    property="joinTime"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="update_time"  property="updateTime"/>
+    </resultMap>
+
+    <!-- 家庭简要信息映射，用于 my-families 接口返回 familyList -->
+    <resultMap id="FamilyBriefResultMap" type="com.my.family.paxl.domain.vo.FamilyBriefVO">
+        <id     column="family_id"    property="familyId"/>
+        <result column="family_name"  property="familyName"/>
+        <result column="family_code"  property="familyCode"/>
+        <result column="member_count" property="memberCount"/>
+        <result column="meet_date"    property="meetDate"/>
+        <result column="role"         property="role"/>
+    </resultMap>
+
+    <!-- 通用查询字段 -->
+    <sql id="FamilyMember_Base_Columns">
+        id, family_id, user_id, role, join_status, join_time, create_time, update_time
+    </sql>
+
+    <!-- 新增家庭成员关系（含申请） -->
+    <insert id="insertMember" parameterType="com.my.family.paxl.domain.entity.FamilyMemberDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mf_family_member (
+            family_id,
+            user_id,
+            role,
+            join_status,
+            join_time,
+            create_time,
+            update_time
+        ) VALUES (
+            #{familyId},
+            #{userId},
+            #{role},
+            #{joinStatus},
+            #{joinTime},
+            #{createTime},
+            #{updateTime}
+        )
+    </insert>
+
+    <!-- 根据家庭ID和用户ID查询成员关系 -->
+    <select id="selectByFamilyIdAndUserId" resultMap="FamilyMemberResultMap">
+        SELECT
+        <include refid="FamilyMember_Base_Columns"/>
+        FROM mf_family_member
+        WHERE family_id = #{familyId}
+          AND user_id   = #{userId}
+        LIMIT 1
+    </select>
+
+    <!-- 根据主键ID查询成员关系 -->
+    <select id="selectById" resultMap="FamilyMemberResultMap">
+        SELECT
+        <include refid="FamilyMember_Base_Columns"/>
+        FROM mf_family_member
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+    <!-- 更新成员的加入状态及加入时间 -->
+    <update id="updateJoinStatus" parameterType="com.my.family.paxl.domain.entity.FamilyMemberDO">
+        UPDATE mf_family_member
+        <set>
+            <if test="joinStatus != null">
+                join_status = #{joinStatus},
+            </if>
+            <if test="joinTime != null">
+                join_time = #{joinTime},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime}
+            </if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 查询指定家庭下待审批的成员列表 -->
+    <select id="selectPendingMembers" resultMap="FamilyMemberResultMap">
+        SELECT
+        <include refid="FamilyMember_Base_Columns"/>
+        FROM mf_family_member
+        WHERE family_id = #{familyId}
+          AND join_status = 'PENDING'
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 查询用户已加入的家庭列表（用于 my-families 接口） -->
+    <select id="selectFamiliesByUserId" resultMap="FamilyBriefResultMap">
+        SELECT
+            fm.family_id    AS family_id,
+            f.family_name   AS family_name,
+            f.family_code   AS family_code,
+            f.member_count  AS member_count,
+            f.meet_date     AS meet_date,
+            fm.role         AS role
+        FROM mf_family_member fm
+                 JOIN mf_family f ON fm.family_id = f.id
+        WHERE fm.user_id     = #{userId}
+          AND fm.join_status = 'APPROVED'
+          AND f.status       = 0
+        ORDER BY f.create_time ASC
+    </select>
+
+</mapper>
+

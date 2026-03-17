@@ -25,6 +25,11 @@ public class BannerDO implements Serializable {
     private Long bannerId;
 
     /**
+     * 所属家庭ID，对应 mf_family.id
+     */
+    private Long familyId;
+
+    /**
      * 图片存储路径（相对路径）
      */
     private String imagePath;
@@ -83,6 +88,14 @@ public class BannerDO implements Serializable {
 
     public void setBannerId(Long bannerId) {
         this.bannerId = bannerId;
+    }
+
+    public Long getFamilyId() {
+        return familyId;
+    }
+
+    public void setFamilyId(Long familyId) {
+        this.familyId = familyId;
     }
 
     public String getImagePath() {
@@ -162,6 +175,7 @@ public class BannerDO implements Serializable {
         return "BannerDO{" +
                 "id=" + id +
                 ", bannerId=" + bannerId +
+                ", familyId=" + familyId +
                 ", imagePath='" + imagePath + '\'' +
                 ", position=" + position +
                 ", title='" + title + '\'' +

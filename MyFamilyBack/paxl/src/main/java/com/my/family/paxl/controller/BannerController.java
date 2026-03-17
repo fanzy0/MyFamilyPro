@@ -1,5 +1,6 @@
 package com.my.family.paxl.controller;
 
+import com.my.family.paxl.context.UserContext;
 import com.my.family.paxl.domain.entity.BannerDO;
 import com.my.family.paxl.domain.entity.BannerCommentDO;
 import com.my.family.paxl.service.BannerCommentService;
@@ -73,9 +74,9 @@ public class BannerController {
 
     /**
      * 保存轮播图片
-     * 用户上传图片后，调用此接口保存图片信息到数据库
+     * 请求体中必须包含 familyId，当前用户须为该家庭的 APPROVED 成员
      *
-     * @param bannerDO 轮播图片数据对象，必须包含imagePath
+     * @param bannerDO 轮播图片数据对象，必须包含 imagePath 和 familyId
      * @return 操作结果
      */
     @PostMapping("/save")
@@ -87,9 +88,13 @@ public class BannerController {
             if (!StringUtils.hasText(bannerDO.getImagePath())) {
                 return ResponseEntity.badRequest().body("图片路径不能为空");
             }
+            if (bannerDO.getFamilyId() == null || bannerDO.getFamilyId() <= 0) {
+                return ResponseEntity.badRequest().body("家庭ID不能为空");
+            }
 
-            BannerDO savedBanner = bannerService.saveBanner(bannerDO);
-            log.info("[SaveBanner] 保存轮播图片成功, bannerId={}", savedBanner.getBannerId());
+            Long userId = UserContext.getCurrentUserId();
+            BannerDO savedBanner = bannerService.saveBanner(bannerDO, userId);
+            log.info("[SaveBanner] 保存轮播图片成功, bannerId={}, familyId={}", savedBanner.getBannerId(), savedBanner.getFamilyId());
             return ResponseEntity.ok("保存轮播图片成功");
 
         } catch (IllegalArgumentException e) {
@@ -103,6 +108,7 @@ public class BannerController {
 
     /**
      * 删除轮播图片
+     * 当前用户须为该 banner 所属家庭的 APPROVED 成员
      *
      * @param bannerId 轮播图ID，业务编号
      * @return 操作结果
@@ -114,7 +120,8 @@ public class BannerController {
                 return ResponseEntity.badRequest().body("轮播图ID不合法");
             }
 
-            bannerService.deleteBanner(bannerId);
+            Long userId = UserContext.getCurrentUserId();
+            bannerService.deleteBanner(bannerId, userId);
             log.info("[DeleteBanner] 删除轮播图片成功, bannerId={}", bannerId);
             return ResponseEntity.ok("删除轮播图片成功");
 
@@ -128,18 +135,27 @@ public class BannerController {
     }
 
     /**
-     * 查询所有启用的轮播图片
-     * 返回图片元素信息，不包含图片内容，防止一次调用返回多张图片导致报文过大
+     * 查询指定家庭下启用的轮播图片
+     * 当前用户须为该家庭的 APPROVED 成员
      *
+     * @param familyId 家庭ID
      * @return 轮播图片列表，按位置排序
      */
     @GetMapping("/list")
-    public ResponseEntity<List<BannerDO>> listBanners() {
+    public ResponseEntity<List<BannerDO>> listBanners(@RequestParam("familyId") Long familyId) {
         try {
-            List<BannerDO> banners = bannerService.listEnabledBanners();
-            log.info("[ListBanners] 查询轮播图片列表成功, count={}", banners.size());
+            if (familyId == null || familyId <= 0) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            Long userId = UserContext.getCurrentUserId();
+            List<BannerDO> banners = bannerService.listEnabledBanners(familyId, userId);
+            log.info("[ListBanners] 查询轮播图片列表成功, familyId={}, count={}", familyId, banners.size());
             return ResponseEntity.ok(banners);
 
+        } catch (IllegalArgumentException e) {
+            log.warn("[ListBanners] 参数校验失败, msg={}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             log.error("[ListBanners] 查询轮播图片列表异常", e);
             return ResponseEntity.internalServerError().build();

@@ -1,0 +1,76 @@
+<!--pages/family/guide/guide.wxml-->
+<view class="container">
+
+  <!-- 顶部 Logo 与标题区 -->
+  <view class="header-section">
+    <view class="logo-circle">
+      <text class="logo-text">家</text>
+    </view>
+    <text class="page-title">欢迎加入我们的家</text>
+    <text class="page-subtitle">记录每一温馨时刻</text>
+  </view>
+
+  <!-- 已有家庭列表（有数据时展示） -->
+  <view class="section-block" wx:if="{{familyList.length > 0}}">
+    <view class="section-title-row">
+      <text class="section-title">我已加入的家庭</text>
+      <view class="loading-dot" wx:if="{{loading}}"></view>
+    </view>
+    <view
+      class="family-item"
+      wx:for="{{familyList}}"
+      wx:key="familyId"
+      bindtap="onEnterFamily"
+      data-family-id="{{item.familyId}}"
+    >
+      <view class="family-item-icon-wrap">
+        <text class="family-item-icon">🏡</text>
+      </view>
+      <view class="family-item-info">
+        <text class="family-item-name">{{item.familyName}}</text>
+        <text class="family-item-meta">{{item.role === 'OWNER' ? '户主' : '成员'}} · {{item.memberCount}}人</text>
+      </view>
+      <text class="family-item-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 分隔线（有家庭时显示） -->
+  <view class="divider-row" wx:if="{{familyList.length > 0}}">
+    <view class="divider-line"></view>
+    <text class="divider-text">或者</text>
+    <view class="divider-line"></view>
+  </view>
+
+  <!-- 创建/加入按钮区 -->
+  <view class="card-section">
+
+    <view class="action-card" bindtap="onCreateTap">
+      <view class="card-icon-wrap card-icon-primary">
+        <text class="card-icon">🏠</text>
+      </view>
+      <view class="card-content">
+        <text class="card-title">创建我的家庭</text>
+        <text class="card-desc">以你为户主，创建一个新的家庭</text>
+      </view>
+      <text class="card-arrow">›</text>
+    </view>
+
+    <view class="action-card" bindtap="onJoinTap">
+      <view class="card-icon-wrap card-icon-secondary">
+        <text class="card-icon">👨‍👩‍👧‍👦</text>
+      </view>
+      <view class="card-content">
+        <text class="card-title">加入现有家庭</text>
+        <text class="card-desc">通过家庭编号加入亲人的家庭</text>
+      </view>
+      <text class="card-arrow">›</text>
+    </view>
+
+  </view>
+
+  <!-- 底部说明 -->
+  <view class="footer-tip">
+    <text class="tip-text">你可以在多个家庭间自由切换</text>
+  </view>
+
+</view>

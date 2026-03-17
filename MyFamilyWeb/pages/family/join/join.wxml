@@ -1,0 +1,70 @@
+<!--pages/family/join/join.wxml-->
+<view class="container">
+
+  <!-- 顶部标题区 -->
+  <view class="header-section">
+    <view class="header-icon-wrap">
+      <text class="header-icon">👨‍👩‍👧‍👦</text>
+    </view>
+    <text class="page-title">加入家庭</text>
+    <text class="page-subtitle">向户主要来的家庭编号，申请加入他/她的家庭</text>
+  </view>
+
+  <!-- 输入区 -->
+  <view class="form-section">
+    <view class="form-card">
+      <view class="field-label">家庭编号</view>
+      <view class="input-row">
+        <input
+          class="field-input"
+          type="text"
+          placeholder="请输入家庭编号"
+          placeholder-class="field-placeholder"
+          value="{{familyCode}}"
+          bindinput="onFamilyCodeInput"
+          confirm-type="search"
+          bindconfirm="onQueryFamily"
+        />
+      </view>
+      <view class="field-line"></view>
+
+      <!-- 查询按钮 -->
+      <button
+        class="query-btn {{querying ? 'query-btn-loading' : ''}}"
+        bindtap="onQueryFamily"
+        disabled="{{querying}}"
+      >
+        <text class="query-btn-text">{{querying ? '查询中...' : '查询家庭信息'}}</text>
+      </button>
+    </view>
+  </view>
+
+  <!-- 家庭预览卡片（查询成功后展示） -->
+  <view class="preview-section" wx:if="{{familyPreview}}">
+    <view class="preview-card">
+      <view class="preview-header">
+        <text class="preview-tag">查询结果</text>
+      </view>
+      <view class="preview-row">
+        <text class="preview-label">家庭名称</text>
+        <text class="preview-value">{{familyPreview.familyName}}</text>
+      </view>
+      <view class="preview-divider"></view>
+      <view class="preview-row">
+        <text class="preview-label">当前成员</text>
+        <text class="preview-value">{{familyPreview.memberCount}} 位成员</text>
+      </view>
+      <text class="preview-tip">确认这是你要加入的家庭？</text>
+    </view>
+
+    <!-- 申请加入按钮 -->
+    <button
+      class="primary-btn {{submitting ? 'primary-btn-loading' : ''}}"
+      bindtap="onApplyJoin"
+      disabled="{{submitting}}"
+    >
+      <text class="btn-text">{{submitting ? '提交中...' : '申请加入'}}</text>
+    </button>
+  </view>
+
+</view>
