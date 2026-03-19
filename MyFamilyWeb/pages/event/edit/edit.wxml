@@ -1,0 +1,151 @@
+<!-- pages/event/edit/edit.wxml -->
+<view class="container">
+
+  <!-- ====== 顶部区域（与 list 保持一致） ====== -->
+  <view class="header">
+    <view class="nav-row">
+      <view class="back-label" bindtap="onBack">
+        <text class="back-arrow">‹</text>
+        <text class="back-title">{{isEdit ? '编辑事项' : '新建事项'}}</text>
+      </view>
+      <text class="family-tag">{{currentFamilyName}}</text>
+    </view>
+  </view>
+
+  <!-- ====== 表单主体 ====== -->
+  <scroll-view class="body" scroll-y>
+
+    <!-- 基本信息卡 -->
+    <view class="card">
+      <view class="card-title-row">
+        <view class="card-title-icon" style="background:linear-gradient(135deg,#4facfe 0%,#1a7ff0 100%)">
+          <text class="card-title-emoji">📋</text>
+        </view>
+        <text class="card-title">基本信息</text>
+      </view>
+
+      <view class="field">
+        <text class="label">事项名称</text>
+        <input
+          class="input"
+          placeholder="例如：妈妈生日"
+          placeholder-style="color:#b8cdd9"
+          bindinput="onTitleInput"
+          maxlength="100"
+        />
+      </view>
+
+      <view class="field">
+        <text class="label">类别</text>
+        <picker mode="selector" range="{{categoryOptions}}" range-key="label" value="{{categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker">
+            <text class="picker-text">{{categoryOptions[categoryIndex].label}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="field">
+        <text class="label">日期类型</text>
+        <view class="seg">
+          <view class="seg-item {{form.dateType === 0 ? 'seg-active' : ''}}" bindtap="onDateTypeTap" data-type="0">阳历</view>
+          <view class="seg-item {{form.dateType === 1 ? 'seg-active' : ''}}" bindtap="onDateTypeTap" data-type="1">农历</view>
+        </view>
+      </view>
+
+      <view class="field-row">
+        <view class="field half">
+          <text class="label">月份</text>
+          <picker mode="selector" range="{{monthOptions}}" value="{{monthIndex}}" bindchange="onMonthChange">
+            <view class="picker">
+              <text class="picker-text">{{monthOptions[monthIndex]}} 月</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+        <view class="field half">
+          <text class="label">日期</text>
+          <picker mode="selector" range="{{dayOptions}}" value="{{dayIndex}}" bindchange="onDayChange">
+            <view class="picker">
+              <text class="picker-text">{{dayOptions[dayIndex]}} 日</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+      </view>
+
+      <view class="field">
+        <text class="label">备注</text>
+        <textarea
+          class="textarea"
+          placeholder="可选：补充说明"
+          placeholder-style="color:#b8cdd9"
+          value="{{form.description}}"
+          bindinput="onDescInput"
+          maxlength="500"
+        />
+      </view>
+    </view>
+
+    <!-- 提醒设置卡 -->
+    <view class="card">
+      <view class="card-title-row">
+        <view class="card-title-icon" style="background:linear-gradient(135deg,#2fcf7a 0%,#38f9d7 100%)">
+          <text class="card-title-emoji">🔔</text>
+        </view>
+        <text class="card-title">提醒设置</text>
+        <switch class="remind-switch" checked="{{form.remindEnabled === 1}}" bindchange="onRemindSwitch" color="#1a7ff0" />
+      </view>
+
+      <view wx:if="{{form.remindEnabled === 1}}">
+        <view class="field">
+          <text class="label">提前几天提醒</text>
+          <picker mode="selector" range="{{advanceOptions}}" value="{{advanceIndex}}" bindchange="onAdvanceChange">
+            <view class="picker">
+              <text class="picker-text">{{advanceOptions[advanceIndex]}} 天</text>
+              <text class="picker-arrow">›</text>
+            </view>
+          </picker>
+        </view>
+
+        <view class="field">
+          <text class="label">提醒对象</text>
+          <view class="seg">
+            <view class="seg-item {{form.remindTarget === 'ALL' ? 'seg-active' : ''}}" bindtap="onTargetTap" data-target="ALL">全家</view>
+            <view class="seg-item {{form.remindTarget === 'SPECIFIC' ? 'seg-active' : ''}}" bindtap="onTargetTap" data-target="SPECIFIC">指定</view>
+          </view>
+          <view class="hint" wx:if="{{form.remindTarget === 'SPECIFIC'}}">指定成员选择将在成员模块完善后补齐</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 创建信息卡（编辑模式） -->
+    <view class="card" wx:if="{{isEdit}}">
+      <view class="card-title-row">
+        <view class="card-title-icon" style="background:linear-gradient(135deg,#f093fb 0%,#f5576c 100%)">
+          <text class="card-title-emoji">👤</text>
+        </view>
+        <text class="card-title">创建信息</text>
+      </view>
+      <view class="owner-row">
+        <view class="owner-info">
+          <text class="owner-name">{{detail.creatorNickname || ('用户' + detail.creatorUserId)}}</text>
+          <text class="owner-time">{{detail.createTime || ''}}</text>
+        </view>
+        <view class="danger-btn" wx:if="{{detail.isOwner}}" bindtap="onDelete">删除事项</view>
+      </view>
+      <view class="hint" wx:if="{{!detail.isOwner}}">仅创建人可删除此事项</view>
+    </view>
+
+    <!-- 保存按钮 -->
+    <view class="save-wrap">
+      <view class="save-btn {{submitting ? 'save-btn-disabled' : ''}}" bindtap="onSubmit">
+        <text class="save-btn-text">{{isEdit ? '保存修改' : '创建事项'}}</text>
+      </view>
+    </view>
+
+    <view class="bottom-space"></view>
+
+  </scroll-view>
+
+</view>

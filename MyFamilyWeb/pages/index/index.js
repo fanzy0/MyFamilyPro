@@ -186,13 +186,7 @@ Page({
    * 导航到重要事项页面
    */
   navigateToImportant() {
-    wx.showToast({
-      title: '重要事项功能开发中',
-      icon: 'none'
-    });
-    // wx.navigateTo({
-    //   url: '/pages/important/important'
-    // });
+    wx.navigateTo({ url: '/pages/event/list/list' });
   },
 
   /**

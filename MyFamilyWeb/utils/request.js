@@ -30,6 +30,16 @@ function post(path, data) {
 }
 
 /**
+ * DELETE 请求（业务层）
+ * @param {String} path 请求路径（如：/event/delete）
+ * @param {Object} params 查询参数（可选）
+ * @return {Promise}
+ */
+function del(path, params) {
+  return cloudRequest.del(path, params).catch(handleError);
+}
+
+/**
  * 获取图片（返回 ArrayBuffer）
  * @param {String} path 请求路径
  * @return {Promise<ArrayBuffer>}
@@ -90,5 +100,6 @@ function handleError(err) {
 module.exports = {
   get,
   post,
+  del,
   getImage
 };

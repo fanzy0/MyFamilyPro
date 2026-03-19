@@ -1,6 +1,7 @@
 // pages/family/home/home.js
 const familyApi = require('../../../utils/familyApi.js');
 const bannerApi = require('../../../utils/bannerApi.js');
+const remindApi = require('../../../utils/remindApi.js');
 
 Page({
   /**
@@ -26,7 +27,13 @@ Page({
     showFamilySwitch: false,  // 家庭切换面板是否展开
     showApproval: false,      // 成员审批面板是否展开
     approvLoading: false,     // 审批列表加载状态
-    pendingMembers: []        // 待审批成员列表
+    pendingMembers: [],       // 待审批成员列表
+
+    // 提醒相关
+    remindCount: 0,           // 活跃提醒数量（红点数字，0 时隐藏悬浮按钮）
+    showRemindPanel: false,   // 是否展开提醒浮层
+    remindList: [],           // 活跃提醒列表（展开浮层时拉取）
+    remindLoading: false      // 浮层内容加载状态
   },
 
   onLoad() {
@@ -101,6 +108,9 @@ Page({
 
         // 加载当前家庭的轮播图列表
         this._loadMemoryBanners(current.familyId);
+
+        // 加载提醒红点数量（静默，不影响主流程）
+        this._loadRemindCount(current.familyId);
       })
       .catch(err => {
         this.setData({ loading: false });
@@ -213,6 +223,10 @@ Page({
 
     // 加载新家庭的轮播图
     this._loadMemoryBanners(familyId);
+
+    // 切换家庭后重置提醒状态并重新加载
+    this.setData({ remindCount: 0, remindList: [], showRemindPanel: false });
+    this._loadRemindCount(familyId);
 
     wx.showToast({ title: '已切换到 ' + current.familyName, icon: 'success', duration: 1500 });
     console.log('[Home] 切换家庭, familyId=' + familyId);
@@ -382,7 +396,7 @@ Page({
   },
 
   navigateToImportant() {
-    wx.showToast({ title: '重要事项开发中', icon: 'none' });
+    wx.navigateTo({ url: '/pages/event/list/list' });
   },
 
   /**
@@ -397,5 +411,170 @@ Page({
         wx.showToast({ title: '编号已复制', icon: 'success', duration: 1500 });
       }
     });
+  },
+
+  // ============================
+  //   提醒功能
+  // ============================
+
+  /**
+   * 静默加载当前家庭的活跃提醒数量，更新红点
+   * @param {Number} familyId 家庭ID
+   */
+  _loadRemindCount(familyId) {
+    if (!familyId) return;
+    remindApi.getRemindCount(familyId)
+      .then(count => {
+        this.setData({ remindCount: count || 0 });
+        console.log('[Home] 提醒红点数量:', count);
+      })
+      .catch(err => {
+        console.error('[Home] 加载提醒数量失败:', err);
+      });
+  },
+
+  /**
+   * 展开提醒浮层，同时拉取活跃提醒列表
+   * 后端在此接口调用时同步将 PENDING 标记为 READ
+   */
+  onOpenRemindPanel() {
+    const familyId = this.data.currentFamily && this.data.currentFamily.familyId;
+    if (!familyId) return;
+
+    this.setData({ showRemindPanel: true, remindLoading: true, remindList: [] });
+    console.log('[Home] 展开提醒浮层, familyId=' + familyId);
+
+    remindApi.getActiveReminds(familyId)
+      .then(list => {
+        const remindList = (list || []).map(item => this._buildRemindItem(item));
+        this.setData({ remindList, remindLoading: false });
+      })
+      .catch(err => {
+        this.setData({ remindLoading: false });
+        console.error('[Home] 加载提醒列表失败:', err);
+      });
+  },
+
+  /**
+   * 关闭提醒浮层
+   */
+  onCloseRemindPanel() {
+    this.setData({ showRemindPanel: false });
+  },
+
+  /**
+   * 构建单条提醒的展示数据（计算日期文案、颜色类、emoji）
+   * @param {Object} item RemindLogVO
+   * @return {Object} 扩展后的展示对象
+   */
+  _buildRemindItem(item) {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDate = new Date(item.eventDate);
+    eventDate.setHours(0, 0, 0, 0);
+    const diffDays = Math.round((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+    let dateDesc = '';
+    let dateClass = 'date-normal';
+    if (diffDays < 0) {
+      dateDesc = '已过期（' + item.eventDate + '）';
+      dateClass = 'date-expired';
+    } else if (diffDays === 0) {
+      dateDesc = '就是今天（' + item.eventDate + '）';
+      dateClass = 'date-today';
+    } else if (diffDays <= 3) {
+      dateDesc = '还有 ' + diffDays + ' 天（' + item.eventDate + '）';
+      dateClass = 'date-soon';
+    } else {
+      dateDesc = '还有 ' + diffDays + ' 天（' + item.eventDate + '）';
+      dateClass = 'date-normal';
+    }
+
+    var advanceDesc = item.remindAdvanceDays > 0
+      ? '提前 ' + item.remindAdvanceDays + ' 天提醒'
+      : '当天提醒';
+
+    var emojiMap = {
+      BIRTHDAY: '🎂',
+      ANNIVERSARY: '💍',
+      HOLIDAY: '🎉',
+      DOCUMENT_EXPIRY: '🪪',
+      HEALTH: '🩺',
+      PAYMENT: '💳',
+      OTHER: '📌'
+    };
+
+    return {
+      remindLogId: item.remindLogId,
+      eventId: item.eventId,
+      title: item.title,
+      category: item.category,
+      status: item.status,
+      eventDate: item.eventDate,
+      remindAdvanceDays: item.remindAdvanceDays,
+      dateDesc: dateDesc,
+      dateClass: dateClass,
+      advanceDesc: advanceDesc,
+      categoryEmoji: emojiMap[item.category] || '📌'
+    };
+  },
+
+  /**
+   * 标记某条提醒为"已完成"
+   */
+  onRemindDone(e) {
+    var remindLogId = e.currentTarget.dataset.remindLogId;
+    var index = e.currentTarget.dataset.index;
+    console.log('[Home] 标记完成, remindLogId=' + remindLogId);
+
+    wx.showLoading({ title: '处理中...' });
+    remindApi.doneRemind(remindLogId)
+      .then(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '已标记完成 ✓', icon: 'none', duration: 1500 });
+        this._removeRemindItem(index);
+      })
+      .catch(err => {
+        wx.hideLoading();
+        console.error('[Home] 标记完成失败:', err);
+      });
+  },
+
+  /**
+   * 忽略/关闭一条提醒
+   */
+  onRemindClose(e) {
+    var remindLogId = e.currentTarget.dataset.remindLogId;
+    var index = e.currentTarget.dataset.index;
+    console.log('[Home] 忽略提醒, remindLogId=' + remindLogId);
+
+    wx.showLoading({ title: '处理中...' });
+    remindApi.closeRemind(remindLogId)
+      .then(() => {
+        wx.hideLoading();
+        this._removeRemindItem(index);
+      })
+      .catch(err => {
+        wx.hideLoading();
+        console.error('[Home] 忽略提醒失败:', err);
+      });
+  },
+
+  /**
+   * 从列表移除已操作的条目，同步更新红点数
+   * 列表全部清空后延迟自动关闭浮层
+   * @param {Number} index 条目索引
+   */
+  _removeRemindItem(index) {
+    var list = this.data.remindList.slice();
+    list.splice(index, 1);
+    var newCount = Math.max(0, this.data.remindCount - 1);
+    this.setData({ remindList: list, remindCount: newCount });
+
+    if (list.length === 0) {
+      setTimeout(() => {
+        this.setData({ showRemindPanel: false });
+      }, 800);
+    }
   }
 });

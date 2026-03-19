@@ -103,6 +103,27 @@ function post(path, data) {
 }
 
 /**
+ * DELETE请求
+ * @param {String} path 请求路径
+ * @param {Object} params 查询参数（可选）
+ * @return {Promise}
+ */
+function del(path, params) {
+  // 将参数拼接到URL中
+  if (params && Object.keys(params).length > 0) {
+    const query = Object.keys(params)
+      .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+      .join('&');
+    path = `${path}?${query}`;
+  }
+
+  return cloudRequest({
+    path: path,
+    method: 'DELETE'
+  });
+}
+
+/**
  * 获取图片（返回ArrayBuffer）
  * @param {String} path 请求路径
  * @return {Promise}
@@ -120,5 +141,6 @@ module.exports = {
   cloudRequest,
   get,
   post,
+  del,
   getImage
 };

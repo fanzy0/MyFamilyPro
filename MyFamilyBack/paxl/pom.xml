@@ -43,6 +43,13 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- hutool（农历转换工具）-->
+        <dependency>
+            <groupId>cn.hutool</groupId>
+            <artifactId>hutool-core</artifactId>
+            <version>5.8.25</version>
+        </dependency>
+
         <!-- 测试 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

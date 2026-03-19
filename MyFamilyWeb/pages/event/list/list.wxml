@@ -1,0 +1,119 @@
+<!-- pages/event/list/list.wxml -->
+<view class="container">
+
+  <!-- ====== 顶部区域 ====== -->
+  <view class="header" >
+
+    <!-- 第一行：返回标签 + 家庭名 -->
+    <view class="nav-row">
+      <view class="back-label" bindtap="onBack">
+        <text class="back-arrow">‹</text>
+        <text class="back-title">重要事项</text>
+      </view>
+      <text class="family-tag">{{currentFamilyName}}</text>
+    </view>
+
+    <!-- 第二行：分类筛选（横向滚动） -->
+    <scroll-view
+      class="filter-scroll"
+      scroll-x="{{true}}"
+      enhanced="{{true}}"
+      show-scrollbar="{{false}}"
+    >
+      <view class="filter-list">
+        <view class="chip {{activeCategory==='ALL'?'chip-on':''}}" bindtap="onCategoryTap" data-category="ALL">全部</view>
+        <view class="chip {{activeCategory==='BIRTHDAY'?'chip-on':''}}" bindtap="onCategoryTap" data-category="BIRTHDAY">🎂 生日</view>
+        <view class="chip {{activeCategory==='ANNIVERSARY'?'chip-on':''}}" bindtap="onCategoryTap" data-category="ANNIVERSARY">💍 纪念日</view>
+        <view class="chip {{activeCategory==='HOLIDAY'?'chip-on':''}}" bindtap="onCategoryTap" data-category="HOLIDAY">🎉 节假日</view>
+        <view class="chip {{activeCategory==='DOCUMENT_EXPIRY'?'chip-on':''}}" bindtap="onCategoryTap" data-category="DOCUMENT_EXPIRY">🪪 证件</view>
+        <view class="chip {{activeCategory==='HEALTH'?'chip-on':''}}" bindtap="onCategoryTap" data-category="HEALTH">🩺 健康</view>
+        <view class="chip {{activeCategory==='PAYMENT'?'chip-on':''}}" bindtap="onCategoryTap" data-category="PAYMENT">💳 缴费</view>
+        <view class="chip {{activeCategory==='OTHER'?'chip-on':''}}" bindtap="onCategoryTap" data-category="OTHER">📌 其他</view>
+      </view>
+    </scroll-view>
+
+    <!-- 第三行：搜索框 -->
+    <view class="search-row">
+      <view class="search-box">
+        <text class="search-ic">🔎</text>
+        <input
+          class="search-inp"
+          placeholder="搜索事项名称/创建人"
+          placeholder-style="color:rgba(255,255,255,0.55)"
+          value="{{keyword}}"
+          bindinput="onKeywordInput"
+          confirm-type="search"
+          bindconfirm="onSearchConfirm"
+        />
+        <view class="search-clear" wx:if="{{keyword}}" bindtap="onClearKeyword">✕</view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- ====== 主体内容 ====== -->
+  <scroll-view
+    class="body"
+    scroll-y
+    refresher-enabled="{{true}}"
+    refresher-triggered="{{refreshing}}"
+    bindrefresherrefresh="onRefresh"
+  >
+
+    <!-- 数量栏 -->
+    <view class="count-bar">
+      <text class="count-desc">全年提醒与记录</text>
+      <view class="count-right">
+        <text class="count-num">{{filteredList.length}}</text>
+        <text class="count-unit"> 项</text>
+      </view>
+    </view>
+
+    <!-- 空态 -->
+    <view class="empty" wx:if="{{!loading && filteredList.length === 0}}">
+      <text class="empty-icon">🗓</text>
+      <text class="empty-title">还没有重要事项</text>
+      <text class="empty-desc">记录家人的生日、纪念日、证件到期…</text>
+      <view class="empty-btn" bindtap="onCreateTap">+ 新增第一个事项</view>
+    </view>
+
+    <!-- 事项列表 -->
+    <view class="list" wx:else>
+      <view
+        class="event-item"
+        wx:for="{{filteredList}}"
+        wx:key="id"
+        bindtap="onItemTap"
+        data-event-id="{{item.id}}"
+      >
+        <!-- 左侧：分类图标区 -->
+        <view class="item-icon-wrap" style="background:{{item._iconBg}}">
+          <text class="item-icon-emoji">{{item._emoji}}</text>
+        </view>
+
+        <!-- 中间：主要信息 -->
+        <view class="item-info">
+          <text class="item-title">{{item.title}}</text>
+          <view class="item-meta-row">
+            <text class="item-date">{{item._dateText}}</text>
+            <text class="tag-pill tag-remind" wx:if="{{item.remindEnabled === 1}}">提醒</text>
+            <text class="tag-pill tag-lunar" wx:if="{{item.dateType === 1}}">农历</text>
+          </view>
+        </view>
+
+        <!-- 右侧：分类标签 -->
+        <view class="item-badge" style="background:{{item._tagBg}}">
+          <text class="item-badge-text" style="color:{{item._tagColor}}">{{item._categoryLabel}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="bottom-space"></view>
+  </scroll-view>
+
+  <!-- 悬浮新增按钮 -->
+  <view class="fab" bindtap="onCreateTap">
+    <text class="fab-plus">＋</text>
+  </view>
+
+</view>

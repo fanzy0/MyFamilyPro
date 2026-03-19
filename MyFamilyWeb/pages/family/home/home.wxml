@@ -62,7 +62,7 @@
       <view class="menu-section">
 
         <!-- 执子之手 -->
-        <view class="menu-item" bindtap="navigateToLove">
+        <!-- <view class="menu-item" bindtap="navigateToLove">
           <view class="menu-icon-wrap love-bg">
             <text class="menu-icon-emoji">❤️</text>
           </view>
@@ -71,10 +71,10 @@
             <text class="menu-desc">记录我们的相识相恋</text>
           </view>
           <text class="menu-arrow">›</text>
-        </view>
+        </view> -->
 
         <!-- 平安喜乐 -->
-        <view class="menu-item" bindtap="navigateToHome">
+        <!-- <view class="menu-item" bindtap="navigateToHome">
           <view class="menu-icon-wrap home-bg">
             <text class="menu-icon-emoji">🏠</text>
           </view>
@@ -83,7 +83,7 @@
             <text class="menu-desc">记录大家庭的点点滴滴</text>
           </view>
           <text class="menu-arrow">›</text>
-        </view>
+        </view> -->
 
         <!-- 重要事项 -->
         <view class="menu-item" bindtap="navigateToImportant">
@@ -224,6 +224,106 @@
     <view class="bottom-placeholder"></view>
 
   </scroll-view>
+
+  <!-- ============================================================
+       提醒悬浮入口 + 底部浮层（家庭数据加载完成后显示）
+       ============================================================ -->
+  <block wx:if="{{!loading && currentFamily}}">
+
+    <!-- 悬浮按钮：有活跃提醒时显示，fixed 定位在底部导航上方 -->
+    <view
+      class="remind-fab"
+      wx:if="{{remindCount > 0}}"
+      bindtap="onOpenRemindPanel"
+    >
+      <text class="remind-fab-icon">📋</text>
+      <view class="remind-fab-badge">
+        <text class="remind-fab-badge-text">{{remindCount > 99 ? '99+' : remindCount}}</text>
+      </view>
+    </view>
+
+    <!-- 半透明遮罩：点击关闭浮层 -->
+    <view
+      class="remind-mask"
+      wx:if="{{showRemindPanel}}"
+      bindtap="onCloseRemindPanel"
+    ></view>
+
+    <!-- 提醒浮层：始终渲染，通过 CSS class 控制滑入/滑出动画 -->
+    <view class="remind-panel {{showRemindPanel ? 'remind-panel-show' : ''}}">
+
+      <!-- 顶部拖拽指示条 -->
+      <view class="remind-panel-drag-bar"></view>
+
+      <!-- 浮层标题栏 -->
+      <view class="remind-panel-header">
+        <view class="remind-panel-title-row">
+          <text class="remind-panel-header-icon">📋</text>
+          <text class="remind-panel-title">即将到来的提醒</text>
+          <view class="remind-count-tag" wx:if="{{remindList.length > 0}}">
+            <text class="remind-count-tag-text">{{remindList.length}}条</text>
+          </view>
+        </view>
+        <view class="remind-panel-close" bindtap="onCloseRemindPanel">
+          <text class="remind-close-text">✕</text>
+        </view>
+      </view>
+
+      <!-- 加载中状态 -->
+      <view class="remind-state-box" wx:if="{{remindLoading}}">
+        <view class="remind-loading-spinner"></view>
+        <text class="remind-state-text">加载中...</text>
+      </view>
+
+      <!-- 空态：暂无待处理提醒 -->
+      <view class="remind-state-box" wx:elif="{{!remindLoading && remindList.length === 0}}">
+        <text class="remind-state-emoji">🎉</text>
+        <text class="remind-state-text">暂无待处理提醒</text>
+        <text class="remind-state-sub">所有提醒均已处理完毕</text>
+      </view>
+
+      <!-- 提醒列表 -->
+      <scroll-view scroll-y class="remind-list-scroll" wx:else>
+        <view
+          class="remind-item"
+          wx:for="{{remindList}}"
+          wx:key="remindLogId"
+        >
+          <!-- 左：分类 emoji 图标 -->
+          <view class="remind-item-emoji-wrap">
+            <text class="remind-item-emoji">{{item.categoryEmoji}}</text>
+          </view>
+
+          <!-- 中：事项信息（标题 + 日期倒计时 + 提前天数） -->
+          <view class="remind-item-info">
+            <text class="remind-item-title">{{item.title}}</text>
+            <text class="remind-item-date {{item.dateClass}}">{{item.dateDesc}}</text>
+            <text class="remind-item-advance">{{item.advanceDesc}}</text>
+          </view>
+
+          <!-- 右：操作按钮 -->
+          <view class="remind-item-actions">
+            <view
+              class="btn-remind-done"
+              bindtap="onRemindDone"
+              data-remind-log-id="{{item.remindLogId}}"
+              data-index="{{index}}"
+            >✓ 完成</view>
+            <view
+              class="btn-remind-ignore"
+              bindtap="onRemindClose"
+              data-remind-log-id="{{item.remindLogId}}"
+              data-index="{{index}}"
+            >× 忽略</view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 底部安全区（适配 iPhone 刘海屏） -->
+      <view class="remind-panel-safe"></view>
+    </view>
+
+  </block>
 
   <!-- 底部固定导航 -->
   <view class="bottom-nav" wx:if="{{!loading && currentFamily}}">

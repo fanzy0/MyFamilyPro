@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.EventMapper">
+
+    <!-- ==================== ResultMap ==================== -->
+
+    <!-- 列表项结果映射（不含提醒配置详情） -->
+    <resultMap id="EventBriefMap" type="com.my.family.paxl.domain.vo.EventBriefVO">
+        <id     column="id"               property="id"/>
+        <result column="family_id"        property="familyId"/>
+        <result column="title"            property="title"/>
+        <result column="category"         property="category"/>
+        <result column="date_type"        property="dateType"/>
+        <result column="month"            property="month"/>
+        <result column="day"              property="day"/>
+        <result column="remind_enabled"   property="remindEnabled"/>
+        <result column="creator_user_id"  property="creatorUserId"/>
+        <result column="creator_nickname" property="creatorNickname"/>
+        <result column="create_time"      property="createTime"/>
+    </resultMap>
+
+    <!-- 详情结果映射（含全部字段及创建人信息） -->
+    <resultMap id="EventDetailMap" type="com.my.family.paxl.domain.vo.EventDetailVO">
+        <id     column="id"                  property="id"/>
+        <result column="family_id"           property="familyId"/>
+        <result column="title"               property="title"/>
+        <result column="category"            property="category"/>
+        <result column="date_type"           property="dateType"/>
+        <result column="month"               property="month"/>
+        <result column="day"                 property="day"/>
+        <result column="description"         property="description"/>
+        <result column="remind_enabled"      property="remindEnabled"/>
+        <result column="remind_advance_days" property="remindAdvanceDays"/>
+        <result column="remind_target"       property="remindTarget"/>
+        <result column="remind_user_id"      property="remindUserId"/>
+        <result column="creator_user_id"     property="creatorUserId"/>
+        <result column="creator_nickname"    property="creatorNickname"/>
+        <result column="creator_avatar_url"  property="creatorAvatarUrl"/>
+        <result column="create_time"         property="createTime"/>
+        <result column="update_time"         property="updateTime"/>
+    </resultMap>
+
+    <!-- ==================== 新增 ==================== -->
+
+    <insert id="insertEvent" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO mf_event (
+            family_id,
+            creator_user_id,
+            title,
+            category,
+            date_type,
+            month,
+            day,
+            description,
+            remind_enabled,
+            remind_advance_days,
+            remind_target,
+            remind_user_id,
+            status,
+            deleted,
+            create_time,
+            update_time
+        ) VALUES (
+            #{familyId},
+            #{creatorUserId},
+            #{title},
+            #{category},
+            #{dateType},
+            #{month},
+            #{day},
+            #{description},
+            #{remindEnabled},
+            #{remindAdvanceDays},
+            #{remindTarget},
+            #{remindUserId},
+            0,
+            0,
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <!-- ==================== 查询列表 ==================== -->
+
+    <select id="selectByFamilyId" resultMap="EventBriefMap">
+        SELECT
+            e.id,
+            e.family_id,
+            e.creator_user_id,
+            e.title,
+            e.category,
+            e.date_type,
+            e.month,
+            e.day,
+            e.remind_enabled,
+            e.create_time,
+            u.nickname AS creator_nickname
+        FROM mf_event e
+        LEFT JOIN mf_user u ON u.id = e.creator_user_id
+        WHERE e.family_id = #{familyId}
+          AND e.deleted = 0
+          AND e.status  = 0
+        ORDER BY e.month ASC, e.day ASC
+    </select>
+
+    <!-- ==================== 查询详情 ==================== -->
+
+    <select id="selectDetailById" resultMap="EventDetailMap">
+        SELECT
+            e.id,
+            e.family_id,
+            e.creator_user_id,
+            e.title,
+            e.category,
+            e.date_type,
+            e.month,
+            e.day,
+            e.description,
+            e.remind_enabled,
+            e.remind_advance_days,
+            e.remind_target,
+            e.remind_user_id,
+            e.create_time,
+            e.update_time,
+            u.nickname   AS creator_nickname,
+            u.avatar_url AS creator_avatar_url
+        FROM mf_event e
+        LEFT JOIN mf_user u ON u.id = e.creator_user_id
+        WHERE e.id      = #{id}
+          AND e.deleted = 0
+    </select>
+
+    <!-- ==================== 逻辑删除 ==================== -->
+
+    <update id="logicDeleteById">
+        UPDATE mf_event
+        SET deleted     = 1,
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- ==================== 定时任务：查询全量有效事项 ==================== -->
+
+    <resultMap id="EventBaseResultMap" type="com.my.family.paxl.domain.entity.EventDO">
+        <id     column="id"                  property="id"/>
+        <result column="family_id"           property="familyId"/>
+        <result column="creator_user_id"     property="creatorUserId"/>
+        <result column="title"               property="title"/>
+        <result column="category"            property="category"/>
+        <result column="date_type"           property="dateType"/>
+        <result column="month"               property="month"/>
+        <result column="day"                 property="day"/>
+        <result column="description"         property="description"/>
+        <result column="remind_enabled"      property="remindEnabled"/>
+        <result column="remind_advance_days" property="remindAdvanceDays"/>
+        <result column="remind_target"       property="remindTarget"/>
+        <result column="remind_user_id"      property="remindUserId"/>
+        <result column="status"              property="status"/>
+        <result column="deleted"             property="deleted"/>
+        <result column="create_time"         property="createTime"/>
+        <result column="update_time"         property="updateTime"/>
+    </resultMap>
+
+    <select id="selectAllActiveWithRemind" resultMap="EventBaseResultMap">
+        SELECT id, family_id, creator_user_id, title, category,
+               date_type, month, day, description,
+               remind_enabled, remind_advance_days, remind_target, remind_user_id,
+               status, deleted, create_time, update_time
+        FROM mf_event
+        WHERE remind_enabled = 1
+          AND status         = 0
+          AND deleted        = 0
+    </select>
+
+</mapper>

@@ -6,7 +6,9 @@
     "pages/family/create/create",
     "pages/family/join/join",
     "pages/family/approve/approve",
-    "pages/family/home/home"
+    "pages/family/home/home",
+    "pages/event/list/list",
+    "pages/event/edit/edit"
   ],
   "window": {
     "navigationBarTextStyle": "black",

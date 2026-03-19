@@ -1,5 +1,7 @@
 package com.my.family.paxl.service.impl;
 
+import com.my.family.paxl.domain.entity.ImageFileDO;
+import com.my.family.paxl.mapper.ImageFileMapper;
 import com.my.family.paxl.service.ImageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,20 +9,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.UUID;
+
+import javax.annotation.Resource;
+import java.io.IOException;
+import java.time.LocalDateTime;
 
 /**
  * 图片服务实现类
- * 负责图片的上传、存储和读取
+ * 负责图片的上传、存储和读取（存储于数据库）
  *
  * @author fan
  * @date 2026/01/05
@@ -29,11 +27,10 @@ import java.util.UUID;
 @Slf4j
 public class ImageServiceImpl implements ImageService {
 
-    /**
-     * 图片存储根目录，从配置文件读取，默认：./uploads/images
-     */
-    @Value("${paxl.image.upload-path:./uploads/images}")
-    private String uploadPath;
+    private static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+    @Resource
+    private ImageFileMapper imageFileMapper;
 
     /**
      * 允许的图片格式
@@ -45,11 +42,6 @@ public class ImageServiceImpl implements ImageService {
      */
     @Value("${paxl.image.max-size:5242880}")
     private long maxFileSize;
-
-    /**
-     * 日期格式化器，用于创建按日期分类的目录
-     */
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd");
 
     @Override
     public String uploadImage(MultipartFile file) {
@@ -81,31 +73,31 @@ public class ImageServiceImpl implements ImageService {
         }
 
         try {
-            // 步骤4 - 生成文件路径
-            String relativePath = generateRelativePath(extension);
-            Path fullPath = Paths.get(uploadPath, relativePath);
+            // 步骤4 - 组装入库对象
+            ImageFileDO imageFileDO = new ImageFileDO();
+            imageFileDO.setFileName(originalFilename);
+            imageFileDO.setContentType(guessContentType(file.getContentType(), extension));
+            imageFileDO.setFileSize(file.getSize());
+            imageFileDO.setFileData(file.getBytes());
+            imageFileDO.setDeleted(0);
+            LocalDateTime now = LocalDateTime.now();
+            imageFileDO.setCreateTime(now);
+            imageFileDO.setUpdateTime(now);
 
-            // 步骤5 - 创建目录（如果不存在）
-            File parentDir = fullPath.getParent().toFile();
-            if (!parentDir.exists()) {
-                boolean created = parentDir.mkdirs();
-                if (!created) {
-                    log.error("[UploadImage] 创建目录失败, path={}", parentDir.getAbsolutePath());
-                    throw new RuntimeException("创建存储目录失败");
-                }
-                log.info("[UploadImage] 创建目录成功, path={}", parentDir.getAbsolutePath());
+            // 步骤5 - 写入数据库
+            int result = imageFileMapper.insert(imageFileDO);
+            if (result <= 0 || imageFileDO.getId() == null) {
+                log.error("[UploadImage] 图片入库失败, fileName={}", originalFilename);
+                throw new IllegalStateException("保存图片失败");
             }
 
-            // 步骤6 - 保存文件
-            file.transferTo(fullPath.toFile());
-            log.info("[UploadImage] 图片上传成功, relativePath={}, fullPath={}", relativePath, fullPath.toAbsolutePath());
-
-            // 返回相对路径，前端可以通过此路径访问图片
-            return relativePath;
+            String imageId = String.valueOf(imageFileDO.getId());
+            log.info("[UploadImage] 图片入库成功, imageId={}, fileName={}, size={}", imageId, originalFilename, file.getSize());
+            return imageId;
 
         } catch (IOException e) {
-            log.error("[UploadImage] 保存图片失败, fileName={}", originalFilename, e);
-            throw new RuntimeException("保存图片失败: " + e.getMessage());
+            log.error("[UploadImage] 读取上传文件字节失败, fileName={}", originalFilename, e);
+            throw new IllegalStateException("读取图片失败: " + e.getMessage(), e);
         }
     }
 
@@ -118,58 +110,29 @@ public class ImageServiceImpl implements ImageService {
             throw new IllegalArgumentException("图片路径不能为空");
         }
 
-        try {
-            // 步骤1 - 构建完整路径
-            Path fullPath = Paths.get(uploadPath, imagePath);
-
-            // 步骤2 - 安全检查：防止路径遍历攻击
-            Path normalizedPath = fullPath.normalize();
-            Path uploadBasePath = Paths.get(uploadPath).normalize();
-            if (!normalizedPath.startsWith(uploadBasePath)) {
-                log.warn("[GetImageBytes] 非法路径访问, imagePath={}", imagePath);
-                throw new IllegalArgumentException("非法的图片路径");
-            }
-
-            // 步骤3 - 检查文件是否存在
-            File file = normalizedPath.toFile();
-            if (!file.exists() || !file.isFile()) {
-                log.warn("[GetImageBytes] 图片不存在, imagePath={}", imagePath);
-                throw new IllegalArgumentException("图片不存在: " + imagePath);
-            }
-
-            // 步骤4 - 读取文件字节
-            byte[] bytes = Files.readAllBytes(normalizedPath);
-            log.info("[GetImageBytes] 读取图片成功, imagePath={}, size={}", imagePath, bytes.length);
-            return bytes;
-
-        } catch (IOException e) {
-            log.error("[GetImageBytes] 读取图片失败, imagePath={}", imagePath, e);
-            throw new RuntimeException("读取图片失败: " + e.getMessage());
+        Long imageId = parseImageId(imagePath);
+        ImageFileDO data = imageFileMapper.selectDataById(imageId);
+        if (data == null || data.getFileData() == null) {
+            log.warn("[GetImageBytes] 图片不存在, imageId={}", imageId);
+            throw new IllegalArgumentException("图片不存在: " + imagePath);
         }
+
+        log.info("[GetImageBytes] 读取图片成功, imageId={}, size={}", imageId, data.getFileData().length);
+        return data.getFileData();
     }
 
     @Override
     public String getImageContentType(String imagePath) {
         if (!StringUtils.hasText(imagePath)) {
-            return "application/octet-stream";
+            return DEFAULT_CONTENT_TYPE;
         }
 
-        String extension = getFileExtension(imagePath);
-        switch (extension.toLowerCase()) {
-            case "jpg":
-            case "jpeg":
-                return "image/jpeg";
-            case "png":
-                return "image/png";
-            case "gif":
-                return "image/gif";
-            case "bmp":
-                return "image/bmp";
-            case "webp":
-                return "image/webp";
-            default:
-                return "application/octet-stream";
+        Long imageId = parseImageId(imagePath);
+        ImageFileDO meta = imageFileMapper.selectMetaById(imageId);
+        if (meta == null || !StringUtils.hasText(meta.getContentType())) {
+            return DEFAULT_CONTENT_TYPE;
         }
+        return meta.getContentType();
     }
 
     /**
@@ -189,20 +152,44 @@ public class ImageServiceImpl implements ImageService {
         return filename.substring(lastDotIndex + 1);
     }
 
-    /**
-     * 生成相对路径
-     * 格式：yyyy/MM/dd/uuid.扩展名
-     * 例如：2026/01/05/550e8400e29b41d4a716446655440000.jpg
-     *
-     * @param extension 文件扩展名
-     * @return 相对路径
-     */
-    private String generateRelativePath(String extension) {
-        // 按日期创建目录
-        String dateDir = LocalDate.now().format(DATE_FORMATTER);
-        // 生成UUID作为文件名
-        String uuid = UUID.randomUUID().toString().replace("-", "");
-        return dateDir + "/" + uuid + "." + extension;
+    private Long parseImageId(String imagePath) {
+        String idStr = imagePath.trim();
+        try {
+            Long id = Long.valueOf(idStr);
+            if (id <= 0) {
+                throw new NumberFormatException("id<=0");
+            }
+            return id;
+        } catch (NumberFormatException e) {
+            log.warn("[ParseImageId] 非法图片标识, imagePath={}", imagePath);
+            throw new IllegalArgumentException("非法的图片标识: " + imagePath);
+        }
+    }
+
+    private String guessContentType(String multipartContentType, String extension) {
+        if (StringUtils.hasText(multipartContentType)) {
+            return multipartContentType;
+        }
+
+        if (!StringUtils.hasText(extension)) {
+            return DEFAULT_CONTENT_TYPE;
+        }
+
+        switch (extension.toLowerCase()) {
+            case "jpg":
+            case "jpeg":
+                return "image/jpeg";
+            case "png":
+                return "image/png";
+            case "gif":
+                return "image/gif";
+            case "bmp":
+                return "image/bmp";
+            case "webp":
+                return "image/webp";
+            default:
+                return DEFAULT_CONTENT_TYPE;
+        }
     }
 }
 

@@ -97,6 +97,17 @@
         ORDER BY create_time ASC
     </select>
 
+    <!-- 批量查询多个家庭中所有 APPROVED 成员（定时任务使用） -->
+    <select id="selectApprovedMembersByFamilyIds" resultMap="FamilyMemberResultMap">
+        SELECT id, family_id, user_id, role, join_status, join_time, create_time, update_time
+        FROM mf_family_member
+        WHERE family_id IN
+        <foreach collection="familyIds" item="fid" open="(" separator="," close=")">
+            #{fid}
+        </foreach>
+          AND join_status = 'APPROVED'
+    </select>
+
     <!-- 查询用户已加入的家庭列表（用于 my-families 接口） -->
     <select id="selectFamiliesByUserId" resultMap="FamilyBriefResultMap">
         SELECT

@@ -46,10 +46,10 @@ public class BannerController {
 
     /**
      * 上传图片文件
-     * 用户选择图片后，先调用此接口上传图片，获取图片存储路径
+     * 用户选择图片后，先调用此接口上传图片，获取图片标识（数据库ID）
      *
      * @param file 图片文件
-     * @return 图片相对路径，用于后续保存轮播图时使用
+     * @return 图片标识（字符串形式的ID），用于后续保存轮播图时使用（保存到 imagePath 字段）
      */
     @PostMapping("/image/upload")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
@@ -164,10 +164,10 @@ public class BannerController {
 
     /**
      * 查看轮播图片
-     * 根据图片相对路径返回图片流，支持懒加载
-     * 前端在轮播图列表中，先获取轮播图信息（包含图片路径），然后逐个调用此接口加载图片
+     * 根据图片标识（数据库ID）返回图片流，支持懒加载
+     * 前端在轮播图列表中，先获取轮播图信息（包含 imagePath=图片ID），然后逐个调用此接口加载图片
      *
-     * @param imagePath 图片相对路径，从轮播图信息中的imagePath字段获取
+     * @param imagePath 图片标识（字符串形式的ID），从轮播图信息中的imagePath字段获取
      * @return 图片字节流
      */
     @GetMapping("/image/view")

@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.RemindLogMapper">
+
+    <!-- ==================== ResultMap ==================== -->
+
+    <resultMap id="RemindLogResultMap" type="com.my.family.paxl.domain.entity.RemindLogDO">
+        <id     column="id"           property="id"/>
+        <result column="event_id"     property="eventId"/>
+        <result column="family_id"    property="familyId"/>
+        <result column="user_id"      property="userId"/>
+        <result column="trigger_year" property="triggerYear"/>
+        <result column="event_date"   property="eventDate"/>
+        <result column="remind_date"  property="remindDate"/>
+        <result column="status"       property="status"/>
+        <result column="action_time"  property="actionTime"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="update_time"  property="updateTime"/>
+    </resultMap>
+
+    <!-- 活跃提醒 VO（JOIN mf_event 补充展示字段） -->
+    <resultMap id="RemindLogVOMap" type="com.my.family.paxl.domain.vo.RemindLogVO">
+        <result column="remind_log_id"      property="remindLogId"/>
+        <result column="event_id"           property="eventId"/>
+        <result column="title"              property="title"/>
+        <result column="category"           property="category"/>
+        <result column="status"             property="status"/>
+        <result column="event_date"         property="eventDate"/>
+        <result column="remind_date"        property="remindDate"/>
+        <result column="remind_advance_days" property="remindAdvanceDays"/>
+    </resultMap>
+
+    <!-- 历年提醒记录 VO -->
+    <resultMap id="RemindHistoryVOMap" type="com.my.family.paxl.domain.vo.RemindHistoryVO">
+        <result column="remind_log_id" property="remindLogId"/>
+        <result column="trigger_year"  property="triggerYear"/>
+        <result column="event_date"    property="eventDate"/>
+        <result column="status"        property="status"/>
+        <result column="action_time"   property="actionTime"/>
+    </resultMap>
+
+    <!-- ==================== 批量 INSERT IGNORE ==================== -->
+
+    <insert id="batchInsertIgnore">
+        INSERT IGNORE INTO mf_remind_log (
+            event_id, family_id, user_id, trigger_year,
+            event_date, remind_date, status,
+            create_time, update_time
+        ) VALUES
+        <foreach collection="logs" item="log" separator=",">
+            (
+                #{log.eventId},
+                #{log.familyId},
+                #{log.userId},
+                #{log.triggerYear},
+                #{log.eventDate},
+                #{log.remindDate},
+                #{log.status},
+                NOW(),
+                NOW()
+            )
+        </foreach>
+    </insert>
+
+    <!-- ==================== 查询过期的 PENDING/READ 记录 ==================== -->
+
+    <select id="selectExpiredPending" resultMap="RemindLogResultMap">
+        SELECT id, event_id, family_id, user_id, trigger_year,
+               event_date, remind_date, status, action_time, create_time, update_time
+        FROM mf_remind_log
+        WHERE event_date &lt; #{beforeDate}
+          AND status IN ('PENDING', 'READ')
+    </select>
+
+    <!-- ==================== 批量系统关闭 ==================== -->
+
+    <update id="batchCloseBySys">
+        UPDATE mf_remind_log
+        SET status      = 'CLOSED_BY_SYSTEM',
+            action_time = #{actionTime},
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+          AND status IN ('PENDING', 'READ')
+    </update>
+
+    <!-- ==================== 查询活跃提醒列表（JOIN mf_event） ==================== -->
+
+    <select id="selectActiveByUserAndFamily" resultMap="RemindLogVOMap">
+        SELECT
+            rl.id                     AS remind_log_id,
+            rl.event_id               AS event_id,
+            e.title                   AS title,
+            e.category                AS category,
+            rl.status                 AS status,
+            rl.event_date             AS event_date,
+            rl.remind_date            AS remind_date,
+            e.remind_advance_days     AS remind_advance_days
+        FROM mf_remind_log rl
+        INNER JOIN mf_event e ON e.id = rl.event_id AND e.deleted = 0
+        WHERE rl.user_id   = #{userId}
+          AND rl.family_id = #{familyId}
+          AND rl.status IN ('PENDING', 'READ')
+        ORDER BY rl.event_date ASC
+    </select>
+
+    <!-- ==================== 统计活跃提醒数量 ==================== -->
+
+    <select id="countActiveByUserAndFamily" resultType="int">
+        SELECT COUNT(*)
+        FROM mf_remind_log
+        WHERE user_id   = #{userId}
+          AND family_id = #{familyId}
+          AND status IN ('PENDING', 'READ')
+    </select>
+
+    <!-- ==================== 批量标记已读（PENDING → READ） ==================== -->
+
+    <update id="batchMarkReadByUserAndFamily">
+        UPDATE mf_remind_log
+        SET status      = 'READ',
+            update_time = NOW()
+        WHERE user_id   = #{userId}
+          AND family_id = #{familyId}
+          AND status    = 'PENDING'
+    </update>
+
+    <!-- ==================== 标记已完成（DONE） ==================== -->
+
+    <update id="markDone">
+        UPDATE mf_remind_log
+        SET status      = 'DONE',
+            action_time = #{actionTime},
+            update_time = NOW()
+        WHERE id      = #{id}
+          AND user_id = #{userId}
+          AND status IN ('PENDING', 'READ')
+    </update>
+
+    <!-- ==================== 用户关闭（CLOSED_BY_USER） ==================== -->
+
+    <update id="closeByUser">
+        UPDATE mf_remind_log
+        SET status      = 'CLOSED_BY_USER',
+            action_time = #{actionTime},
+            update_time = NOW()
+        WHERE id      = #{id}
+          AND user_id = #{userId}
+          AND status IN ('PENDING', 'READ')
+    </update>
+
+    <!-- ==================== 历年提醒记录（含全部状态） ==================== -->
+
+    <select id="selectHistoryByEvent" resultMap="RemindHistoryVOMap">
+        SELECT
+            id           AS remind_log_id,
+            trigger_year AS trigger_year,
+            event_date   AS event_date,
+            status       AS status,
+            action_time  AS action_time
+        FROM mf_remind_log
+        WHERE event_id = #{eventId}
+          AND user_id  = #{userId}
+        ORDER BY trigger_year DESC
+    </select>
+
+    <!-- ==================== 按主键查询（校验归属用） ==================== -->
+
+    <select id="selectById" resultMap="RemindLogResultMap">
+        SELECT id, event_id, family_id, user_id, trigger_year,
+               event_date, remind_date, status, action_time, create_time, update_time
+        FROM mf_remind_log
+        WHERE id = #{id}
+        LIMIT 1
+    </select>
+
+</mapper>

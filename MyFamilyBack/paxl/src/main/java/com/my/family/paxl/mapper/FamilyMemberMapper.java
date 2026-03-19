@@ -66,5 +66,14 @@ public interface FamilyMemberMapper extends BaseMapper<FamilyMemberDO> {
      * @return 家庭简要信息列表
      */
     List<FamilyBriefVO> selectFamiliesByUserId(@Param("userId") Long userId);
+
+    /**
+     * 批量查询指定家庭列表中所有 APPROVED 成员（定时扫描任务使用）
+     * 返回包含 familyId 和 userId 的成员列表，一次查询覆盖多个家庭
+     *
+     * @param familyIds 家庭ID列表（不能为空）
+     * @return 成员关系列表（只填充 familyId / userId 字段）
+     */
+    List<FamilyMemberDO> selectApprovedMembersByFamilyIds(@Param("familyIds") List<Long> familyIds);
 }
 

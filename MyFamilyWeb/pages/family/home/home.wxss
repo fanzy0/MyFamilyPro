@@ -620,3 +620,342 @@ page {
   color: #c8697e;
   font-weight: 600;
 }
+
+/* ============================
+   提醒浮层相关样式
+   ============================ */
+
+/* 悬浮按钮（FAB） */
+.remind-fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 180rpx;
+  width: 100rpx;
+  height: 100rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c8697e 0%, #e8956e 100%);
+  box-shadow: 0 8rpx 24rpx rgba(200, 105, 126, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: transform 0.15s;
+}
+
+.remind-fab:active {
+  transform: scale(0.92);
+}
+
+.remind-fab-icon {
+  font-size: 42rpx;
+  line-height: 1;
+}
+
+/* 红点角标 */
+.remind-fab-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  min-width: 40rpx;
+  height: 40rpx;
+  border-radius: 20rpx;
+  background: #ff4b4b;
+  padding: 0 8rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx solid #fff;
+}
+
+.remind-fab-badge-text {
+  font-size: 20rpx;
+  color: #fff;
+  font-weight: 700;
+  line-height: 1;
+}
+
+/* 半透明遮罩 */
+.remind-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 101;
+}
+
+/* 提醒浮层主体 */
+.remind-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* 给定固定高度，让 flex 子项（scroll-view）可以计算自身高度 */
+  height: 68vh;
+  background: #fff;
+  border-radius: 32rpx 32rpx 0 0;
+  z-index: 102;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  box-shadow: 0 -8rpx 40rpx rgba(0, 0, 0, 0.12);
+  /* 适配 iPhone 底部安全区 */
+  padding-bottom: env(safe-area-inset-bottom);
+  box-sizing: border-box;
+}
+
+.remind-panel-show {
+  transform: translateY(0);
+}
+
+/* 浮层顶部拖拽指示条区域 */
+.remind-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 36rpx 16rpx;
+  flex-shrink: 0;
+}
+
+.remind-panel-drag-bar {
+  position: absolute;
+  top: 14rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64rpx;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: #e0e0e0;
+}
+
+.remind-panel-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #2d3a45;
+}
+
+.remind-panel-close {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #f5f6fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #8a9bb0;
+}
+
+/* 浮层滚动区 */
+.remind-panel-scroll {
+  flex: 1;
+  overflow: hidden;
+  padding: 0 24rpx 32rpx;
+}
+
+/* 加载中提示 */
+.remind-loading {
+  padding: 60rpx 0;
+  text-align: center;
+  font-size: 28rpx;
+  color: #b0c4d4;
+}
+
+/* 空状态 */
+.remind-empty {
+  padding: 80rpx 0;
+  text-align: center;
+}
+
+.remind-empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.remind-empty-text {
+  font-size: 28rpx;
+  color: #b0c4d4;
+}
+
+/* 浮层滚动列表：必须用 flex:1 + height:0 组合，scroll-view 才能在真机正确计算高度 */
+.remind-list-scroll {
+  flex: 1;
+  height: 0;
+  min-height: 0;
+  padding: 0 24rpx 16rpx;
+  box-sizing: border-box;
+}
+
+/* 加载 / 空态 通用容器 */
+.remind-state-box {
+  padding: 80rpx 0 60rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.remind-loading-spinner {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  border: 6rpx solid #f0f4f8;
+  border-top-color: #c8697e;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.remind-state-emoji {
+  font-size: 72rpx;
+}
+
+.remind-state-text {
+  font-size: 28rpx;
+  color: #8a9bb0;
+}
+
+.remind-state-sub {
+  font-size: 24rpx;
+  color: #b0c4d4;
+}
+
+/* 浮层标题行（图标 + 文字 + 数量标签） */
+.remind-panel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  flex: 1;
+}
+
+.remind-panel-header-icon {
+  font-size: 36rpx;
+}
+
+.remind-count-tag {
+  background: #ffeef1;
+  border-radius: 20rpx;
+  padding: 4rpx 14rpx;
+}
+
+.remind-count-tag-text {
+  font-size: 22rpx;
+  color: #c8697e;
+  font-weight: 600;
+}
+
+.remind-close-text {
+  font-size: 26rpx;
+}
+
+/* 底部安全区（保留 DOM 节点但不再额外占高，由 panel 的 padding-bottom 统一处理） */
+.remind-panel-safe {
+  height: 0;
+  flex-shrink: 0;
+}
+
+/* 单条提醒卡片 */
+.remind-item {
+  background: #f8f9fc;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16rpx;
+}
+
+.remind-item-emoji-wrap {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.06);
+}
+
+.remind-item-emoji {
+  font-size: 36rpx;
+  line-height: 1;
+}
+
+/* 中间信息区 */
+.remind-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+}
+
+.remind-item-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2d3a45;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 日期倒计时文案（含颜色主题） */
+.remind-item-date {
+  font-size: 22rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  align-self: flex-start;
+}
+
+.date-expired { background: #fff0f0; color: #e85d5d; }
+.date-today   { background: #fff4e0; color: #e8963e; }
+.date-soon    { background: #fff7e0; color: #c8a020; }
+.date-normal  { background: #f0f4f8; color: #5a7a96; }
+
+.remind-item-advance {
+  font-size: 20rpx;
+  color: #b0c4d4;
+}
+
+/* 右侧操作按钮列 */
+.remind-item-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  flex-shrink: 0;
+}
+
+.btn-remind-done {
+  min-width: 120rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #c8697e 0%, #e8956e 100%);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(200, 105, 126, 0.3);
+}
+
+.btn-remind-ignore {
+  min-width: 120rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: #f0f4f8;
+  color: #8a9bb0;
+  font-size: 24rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

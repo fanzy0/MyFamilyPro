@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.my.family.paxl.mapper.ImageFileMapper">
+
+    <!--
+      图片文件表映射配置
+      数据库表：t_image_file
+    -->
+    <resultMap id="ImageFileResultMap" type="com.my.family.paxl.domain.entity.ImageFileDO">
+        <id column="id" property="id"/>
+        <result column="file_name"    property="fileName"/>
+        <result column="content_type" property="contentType"/>
+        <result column="file_size"    property="fileSize"/>
+        <result column="file_data"    property="fileData"/>
+        <result column="deleted"      property="deleted"/>
+        <result column="create_time"  property="createTime"/>
+        <result column="update_time"  property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, file_name, content_type, file_size, deleted, create_time, update_time
+    </sql>
+
+    <insert id="insert" parameterType="com.my.family.paxl.domain.entity.ImageFileDO" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_image_file (
+            file_name, content_type, file_size, file_data, deleted, create_time, update_time
+        ) VALUES (
+            #{fileName}, #{contentType}, #{fileSize}, #{fileData}, #{deleted}, #{createTime}, #{updateTime}
+        )
+    </insert>
+
+    <select id="selectDataById" parameterType="java.lang.Long" resultMap="ImageFileResultMap">
+        SELECT id, file_size, file_data
+        FROM t_image_file
+        WHERE id = #{id}
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+    <select id="selectMetaById" parameterType="java.lang.Long" resultMap="ImageFileResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM t_image_file
+        WHERE id = #{id}
+          AND deleted = 0
+        LIMIT 1
+    </select>
+
+</mapper>
+

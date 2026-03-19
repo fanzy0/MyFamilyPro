@@ -1,0 +1,319 @@
+/* pages/event/edit/edit.wxss */
+
+page {
+  background: #f0f4f8;
+  min-height: 100vh;
+  width: 100%;
+}
+
+.container {
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+/* ============================
+   顶部区域 — 与 list 页一致的蓝色渐变
+   ============================ */
+.header {
+  width: 100%;
+  background: linear-gradient(160deg, #1a7ff0 0%, #4facfe 65%, #87c3ff 100%);
+  padding-bottom: 22rpx;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  padding-top: 15px;
+  padding-bottom: 15rpx;
+}
+
+.nav-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 28rpx 12rpx;
+  box-sizing: border-box;
+}
+
+.back-label {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
+.back-label:active {
+  opacity: 0.7;
+}
+
+.back-arrow {
+  font-size: 52rpx;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 300;
+  line-height: 1;
+  margin-top: -4rpx;
+}
+
+.back-title {
+  font-size: 38rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 1rpx;
+}
+
+.family-tag {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.22);
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  max-width: 220rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================
+   表单主体 scroll-view
+   ============================ */
+.body {
+  flex: 1;
+  width: 100%;
+  height: 0;
+  padding: 20rpx 24rpx 0;
+  box-sizing: border-box;
+}
+
+/* ============================
+   卡片
+   ============================ */
+.card {
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx 28rpx 24rpx;
+  box-shadow: 0 2rpx 16rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 20rpx;
+  box-sizing: border-box;
+}
+
+/* 卡片标题行 */
+.card-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+
+.card-title-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 14rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 16rpx;
+}
+
+.card-title-emoji {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.card-title {
+  flex: 1;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: #1a2740;
+  letter-spacing: 0.5rpx;
+}
+
+.remind-switch {
+  flex-shrink: 0;
+}
+
+/* ============================
+   表单字段
+   ============================ */
+.field {
+  margin-top: 22rpx;
+}
+
+.field-row {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+
+.half {
+  flex: 1;
+  margin-top: 0;
+}
+
+.label {
+  font-size: 22rpx;
+  color: #9fb8cc;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.input {
+  width: 100%;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: #f3f6fa;
+  border-radius: 16rpx;
+  padding: 0 18rpx;
+  font-size: 28rpx;
+  color: #1a2740;
+  box-sizing: border-box;
+}
+
+.textarea {
+  width: 100%;
+  background: #f3f6fa;
+  border-radius: 16rpx;
+  padding: 18rpx 18rpx;
+  font-size: 28rpx;
+  color: #1a2740;
+  min-height: 160rpx;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+.picker {
+  width: 100%;
+  height: 88rpx;
+  background: #f3f6fa;
+  border-radius: 16rpx;
+  padding: 0 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+}
+
+.picker-text {
+  font-size: 28rpx;
+  color: #1a2740;
+}
+
+.picker-arrow {
+  font-size: 40rpx;
+  color: #c8d8e4;
+  font-weight: 300;
+}
+
+/* 分段选择器 */
+.seg {
+  display: flex;
+  background: #f3f6fa;
+  border-radius: 16rpx;
+  overflow: hidden;
+  padding: 6rpx;
+  gap: 6rpx;
+}
+
+.seg-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 26rpx;
+  color: #9fb8cc;
+  border-radius: 12rpx;
+}
+
+.seg-active {
+  background: linear-gradient(135deg, #1a7ff0 0%, #4facfe 100%);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(26, 127, 240, 0.28);
+}
+
+.hint {
+  font-size: 22rpx;
+  color: #9fb8cc;
+  margin-top: 12rpx;
+  line-height: 1.6;
+}
+
+/* ============================
+   创建信息区域
+   ============================ */
+.owner-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 4rpx;
+}
+
+.owner-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.owner-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a2740;
+}
+
+.owner-time {
+  font-size: 22rpx;
+  color: #9fb8cc;
+}
+
+.danger-btn {
+  padding: 14rpx 24rpx;
+  border-radius: 28rpx;
+  background: rgba(255, 75, 110, 0.08);
+  color: #ff4b6e;
+  border: 1rpx solid rgba(255, 75, 110, 0.22);
+  font-size: 24rpx;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.danger-btn:active {
+  opacity: 0.8;
+}
+
+/* ============================
+   底部保存按钮
+   ============================ */
+.save-wrap {
+  padding: 8rpx 0 0;
+}
+
+.save-btn {
+  width: 100%;
+  height: 96rpx;
+  border-radius: 48rpx;
+  background: linear-gradient(135deg, #1a7ff0 0%, #4facfe 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12rpx 32rpx rgba(26, 127, 240, 0.38);
+  box-sizing: border-box;
+}
+
+.save-btn:active {
+  opacity: 0.88;
+  transform: scale(0.98);
+}
+
+.save-btn-disabled {
+  opacity: 0.5;
+}
+
+.save-btn-text {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+}
+
+.bottom-space {
+  height: 80rpx;
+}
