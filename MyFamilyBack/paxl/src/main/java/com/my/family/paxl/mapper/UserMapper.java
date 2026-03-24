@@ -54,4 +54,13 @@ public interface UserMapper extends BaseMapper<UserDO> {
      * @return 受影响行数
      */
     int updateProfile(UserDO userDO);
+
+    /**
+     * 更新用户账号状态
+     *
+     * @param id     用户主键 ID
+     * @param status 目标状态（0=正常，1=禁用）
+     * @return 受影响行数
+     */
+    int updateStatus(@Param("id") Long id, @Param("status") Integer status);
 }

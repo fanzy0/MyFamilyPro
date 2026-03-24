@@ -62,7 +62,7 @@ public class AuthInterceptor implements HandlerInterceptor {
 
         if (UserDO.STATUS_DISABLED == user.getStatus()) {
             log.warn("[AuthInterceptor] 用户已被禁用, userId={}, uri={}", user.getId(), request.getRequestURI());
-            writeForbidden(response, "USER_DISABLED", "账号已被禁用，请联系管理员");
+            writeForbidden(response, "USER_DISABLED", "账号已被禁用，请重新授权登录");
             return false;
         }
 

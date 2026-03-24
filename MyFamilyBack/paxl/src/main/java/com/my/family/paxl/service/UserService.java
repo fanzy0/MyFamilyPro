@@ -46,4 +46,12 @@ public interface UserService {
      * @return 更新后的用户信息 VO
      */
     UserInfoVO updateProfile(Long userId, UpdateProfileRequest request);
+
+    /**
+     * 注销用户账号，将用户状态更新为禁用
+     * 注销后用户无法再次登录，鉴权拦截器将返回 403
+     *
+     * @param userId 当前登录用户 ID
+     */
+    void deactivateAccount(Long userId);
 }

@@ -8,7 +8,8 @@
     "pages/family/approve/approve",
     "pages/family/home/home",
     "pages/event/list/list",
-    "pages/event/edit/edit"
+    "pages/event/edit/edit",
+    "pages/protocol/protocol"
   ],
   "window": {
     "navigationBarTextStyle": "black",

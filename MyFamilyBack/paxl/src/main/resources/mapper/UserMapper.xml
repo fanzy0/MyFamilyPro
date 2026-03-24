@@ -81,4 +81,12 @@
         WHERE id = #{id}
     </update>
 
+    <!-- 更新用户账号状态（注销/恢复） -->
+    <update id="updateStatus">
+        UPDATE mf_user
+        SET status      = #{status},
+            update_time = NOW()
+        WHERE id = #{id}
+    </update>
+
 </mapper>

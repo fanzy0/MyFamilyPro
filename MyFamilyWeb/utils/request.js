@@ -70,7 +70,7 @@ function handleError(err) {
     }
   } else if (code === 403) {
     wx.showToast({
-      title: '账号已被禁用，请联系管理员',
+      title: '账号已被禁用，请重新授权登录',
       icon: 'none',
       duration: 3000
     });

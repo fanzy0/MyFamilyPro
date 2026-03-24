@@ -217,6 +217,18 @@
           </view>
         </view>
 
+        <!-- 注销账号 -->
+        <view class="my-group">
+          <view class="my-item my-item-danger" bindtap="onDeactivateAccount">
+            <view class="my-item-icon deactivate-bg">🚪</view>
+            <view class="my-item-content">
+              <text class="my-item-title my-item-title-danger">注销账号</text>
+              <text class="my-item-desc">注销后账号将被禁用，需要重新授权登录</text>
+            </view>
+            <text class="my-item-arrow">›</text>
+          </view>
+        </view>
+
       </view>
     </view>
 

@@ -25,31 +25,48 @@
     <view class="features-section">
       <view class="feature-item">
         <text class="feature-icon">📅</text>
-        <text class="feature-desc">记录家庭重要事项，按时提醒</text>
+        <text class="feature-desc">重要事件到期提醒</text>
       </view>
       <view class="feature-item">
         <text class="feature-icon">👨‍👩‍👧‍👦</text>
-        <text class="feature-desc">一个家庭，共同管理，共同记录</text>
-      </view>
-      <view class="feature-item">
-        <text class="feature-icon">🔔</text>
-        <text class="feature-desc">节日纪念日，微信消息准时提醒</text>
+        <text class="feature-desc">记录家庭美好瞬间</text>
       </view>
     </view>
 
     <!-- 登录按钮区域 -->
     <view class="login-section">
+
+      <!-- 协议勾选 -->
+      <view class="agreement-wrap" bindtap="onToggleAgreement">
+        <view class="checkbox {{agreed ? 'checkbox-checked' : ''}}">
+          <text class="checkbox-icon" wx:if="{{agreed}}">✓</text>
+        </view>
+        <view class="agreement-text">
+          <text class="agreement-prefix">我已阅读并同意</text>
+          <text
+            class="agreement-link"
+            catchtap="onViewProtocol"
+            data-type="USER_PROTOCOL"
+          >《用户协议》</text>
+          <text class="agreement-prefix">和</text>
+          <text
+            class="agreement-link"
+            catchtap="onViewProtocol"
+            data-type="PRIVACY_STATEMENT"
+          >《隐私声明》</text>
+        </view>
+      </view>
+
       <button
-        class="login-btn {{loginLoading ? 'login-btn-loading' : ''}}"
+        class="login-btn {{loginLoading ? 'login-btn-loading' : ''}} {{!agreed ? 'login-btn-disabled' : ''}}"
         bindtap="onLoginTap"
-        disabled="{{loginLoading}}"
+        disabled="{{loginLoading || !agreed}}"
       >
         <view class="btn-content">
           <text class="wechat-icon" wx:if="{{!loginLoading}}">微信</text>
           <text class="btn-text">{{loginLoading ? '登录中...' : '微信一键登录'}}</text>
         </view>
       </button>
-      <text class="login-tips">登录即代表同意《用户协议》和《隐私政策》</text>
     </view>
 
   </view>

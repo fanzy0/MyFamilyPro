@@ -1,0 +1,37 @@
+<!-- pages/protocol/protocol.wxml -->
+<view class="container">
+
+  <!-- 自定义导航栏 -->
+  <view class="nav-bar" >
+    <view class="nav-back" bindtap="onBack">
+      <text class="nav-back-icon">‹</text>
+    </view>
+    <text class="nav-title">{{title}}</text>
+    <view class="nav-placeholder"></view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-spinner"></view>
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 加载失败 -->
+  <view class="error-wrap" wx:elif="{{loadFailed}}">
+    <text class="error-icon">⚠️</text>
+    <text class="error-text">内容加载失败，请稍后重试</text>
+    <view class="retry-btn" bindtap="onRetry">重新加载</view>
+  </view>
+
+  <!-- 协议内容 -->
+  <scroll-view
+    class="content-scroll"
+    scroll-y
+    wx:else
+  >
+    <view class="content-body">
+      <text class="content-text">{{content}}</text>
+    </view>
+  </scroll-view>
+
+</view>

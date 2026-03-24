@@ -54,6 +54,14 @@ public class UserServiceImpl implements UserService {
             log.info("[Login] 新用户创建成功, userId={}", user.getId());
         } else {
             log.info("[Login] 已有用户登录，更新登录时间, userId={}", user.getId());
+
+            // 如果账号处于禁用状态（曾主动注销），重新登录视为恢复账号
+            if (UserDO.STATUS_DISABLED == user.getStatus()) {
+                log.info("[Login] 检测到账号已注销，重新登录自动恢复, userId={}", user.getId());
+                userMapper.updateStatus(user.getId(), UserDO.STATUS_NORMAL);
+                user.setStatus(UserDO.STATUS_NORMAL);
+            }
+
             UserDO updateParam = new UserDO();
             updateParam.setId(user.getId());
             updateParam.setLastLoginTime(now);
@@ -107,6 +115,18 @@ public class UserServiceImpl implements UserService {
         log.info("[UpdateProfile] 用户资料更新成功, userId={}", userId);
 
         return getUserById(userId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deactivateAccount(Long userId) {
+        log.info("[DeactivateAccount] 开始注销账号, userId={}", userId);
+        int rows = userMapper.updateStatus(userId, UserDO.STATUS_DISABLED);
+        if (rows == 0) {
+            log.warn("[DeactivateAccount] 用户不存在或更新失败, userId={}", userId);
+            throw new RuntimeException("注销账号失败，用户不存在");
+        }
+        log.info("[DeactivateAccount] 账号注销成功, userId={}", userId);
     }
 
     /**

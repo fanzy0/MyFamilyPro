@@ -41,8 +41,20 @@ function updateProfile(profileData) {
   return post('/user/updateProfile', profileData);
 }
 
+/**
+ * 注销当前用户账号
+ * 调用后用户状态变为禁用，无法再次登录
+ * 前端应在成功回调中清除本地数据并跳转登录页
+ *
+ * @return {Promise<void>}
+ */
+function deactivateAccount() {
+  return post('/user/deactivate');
+}
+
 module.exports = {
   login,
   getMe,
-  updateProfile
+  updateProfile,
+  deactivateAccount
 };

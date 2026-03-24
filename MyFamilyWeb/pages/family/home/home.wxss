@@ -959,3 +959,16 @@ page {
   align-items: center;
   justify-content: center;
 }
+
+/* 注销账号 */
+.deactivate-bg {
+  background: linear-gradient(135deg, #ffe0e0 0%, #ffd0d0 100%);
+}
+
+.my-item-danger {
+  border-top: 1rpx solid #fff0f0;
+}
+
+.my-item-title-danger {
+  color: #e53e3e;
+}

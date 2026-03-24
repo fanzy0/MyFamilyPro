@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 用户控制器
  * 所有接口需要鉴权（由 AuthInterceptor 统一处理），当前用户从 UserContext 获取
@@ -58,6 +61,36 @@ public class UserController {
 
         } catch (Exception e) {
             log.error("[Me] 获取用户信息异常", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 注销当前用户账号
+     * 将用户状态更新为禁用（status=1），注销后鉴权拦截器将拒绝该账号的所有请求
+     * 前端注销成功后应清除本地缓存并跳转至登录页
+     * 注意：前端 cloudRequest.js 仅识别 200 为成功，此处返回 200 而非 204
+     *
+     * @return 200 OK
+     */
+    @PostMapping("/deactivate")
+    public ResponseEntity<Map<String, Object>> deactivate() {
+        try {
+            UserDO currentUser = UserContext.getCurrentUser();
+            if (currentUser == null) {
+                log.warn("[Deactivate] UserContext 为空，返回 401");
+                return ResponseEntity.status(401).build();
+            }
+
+            userService.deactivateAccount(currentUser.getId());
+            log.info("[Deactivate] 账号注销成功, userId={}", currentUser.getId());
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            return ResponseEntity.ok(result);
+
+        } catch (Exception e) {
+            log.error("[Deactivate] 注销账号异常", e);
             return ResponseEntity.internalServerError().build();
         }
     }

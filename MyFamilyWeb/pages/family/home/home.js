@@ -2,6 +2,7 @@
 const familyApi = require('../../../utils/familyApi.js');
 const bannerApi = require('../../../utils/bannerApi.js');
 const remindApi = require('../../../utils/remindApi.js');
+const userApi = require('../../../utils/userApi.js');
 
 Page({
   /**
@@ -558,6 +559,46 @@ Page({
         wx.hideLoading();
         console.error('[Home] 忽略提醒失败:', err);
       });
+  },
+
+  /**
+   * 注销当前账号
+   * 弹出二次确认对话框，确认后调用注销接口，成功则清除本地状态并跳转登录页
+   */
+  onDeactivateAccount() {
+    wx.showModal({
+      title: '注销账号',
+      content: '注销后账号将被禁用，需要再次授权登录。确定要注销吗？',
+      confirmText: '确认注销',
+      confirmColor: '#e53e3e',
+      cancelText: '取消',
+      success: (res) => {
+        if (!res.confirm) return;
+
+        wx.showLoading({ title: '注销中...' });
+        userApi.deactivateAccount()
+          .then(() => {
+            wx.hideLoading();
+            const app = getApp();
+            if (app && typeof app.clearUserData === 'function') {
+              app.clearUserData();
+            }
+            // clearUserData 会将 authChecked 置为 false，导致登录页陷入等待回调的死循环
+            // 此处主动标记为 true（已知用户未登录），登录页直接展示登录按钮
+            if (app) {
+              app.globalData.authChecked = true;
+            }
+            wx.showToast({ title: '账号已注销', icon: 'success', duration: 1500 });
+            setTimeout(() => {
+              wx.redirectTo({ url: '/pages/login/login' });
+            }, 1600);
+          })
+          .catch(err => {
+            wx.hideLoading();
+            console.error('[Home] 注销账号失败:', err);
+          });
+      }
+    });
   },
 
   /**

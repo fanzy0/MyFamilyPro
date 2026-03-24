@@ -7,7 +7,8 @@ Page({
    */
   data: {
     loading: true,      // 是否正在进行自动登录校验（展示 loading 遮罩）
-    loginLoading: false // 是否正在进行手动登录（按钮 loading 状态）
+    loginLoading: false, // 是否正在进行手动登录（按钮 loading 状态）
+    agreed: false       // 是否已勾选用户协议
   },
 
   /**
@@ -64,11 +65,36 @@ Page({
   },
 
   /**
+   * 切换协议勾选状态
+   */
+  onToggleAgreement() {
+    this.setData({ agreed: !this.data.agreed });
+  },
+
+  /**
+   * 点击协议链接，跳转协议阅读页
+   * @param {Object} e 事件对象，e.currentTarget.dataset.type 为文件类型
+   */
+  onViewProtocol(e) {
+    const type = e.currentTarget.dataset.type;
+    wx.navigateTo({ url: `/pages/protocol/protocol?type=${type}` });
+  },
+
+  /**
    * 点击"微信一键登录"按钮
    * 调用 POST /api/auth/login，openid 由云托管平台自动注入，无需用户授权
    */
   onLoginTap() {
     if (this.data.loginLoading) return;
+
+    if (!this.data.agreed) {
+      wx.showToast({
+        title: '请先阅读并同意用户协议与隐私声明',
+        icon: 'none',
+        duration: 2000
+      });
+      return;
+    }
 
     this.setData({ loginLoading: true });
     console.log('[Login] 开始登录');
