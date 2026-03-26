@@ -46,5 +46,17 @@ public interface FamilyMapper extends BaseMapper<FamilyDO> {
      * @return 影响行数
      */
     int incrementMemberCount(@Param("familyId") Long familyId);
+
+    /**
+     * 更新家庭基础信息（仅名称与相识日期）
+     *
+     * @param familyId   家庭ID
+     * @param familyName 家庭名称
+     * @param meetDate   相识相遇日期（可为空，格式 YYYY-MM-DD）
+     * @return 影响行数
+     */
+    int updateFamilyInfo(@Param("familyId") Long familyId,
+                         @Param("familyName") String familyName,
+                         @Param("meetDate") String meetDate);
 }
 

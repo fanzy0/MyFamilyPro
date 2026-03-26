@@ -4,6 +4,7 @@ import com.my.family.paxl.context.UserContext;
 import com.my.family.paxl.domain.entity.FamilyDO;
 import com.my.family.paxl.domain.entity.FamilyMemberDO;
 import com.my.family.paxl.domain.vo.FamilyBriefVO;
+import com.my.family.paxl.domain.vo.FamilyDetailVO;
 import com.my.family.paxl.service.FamilyService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -251,6 +252,67 @@ public class FamilyController {
     }
 
     /**
+     * 查询家庭详情（名称、编号、成员列表等）
+     *
+     * @param familyId 家庭ID
+     * @return 家庭详情
+     */
+    @GetMapping("/detail")
+    public ResponseEntity<FamilyDetailVO> getFamilyDetail(@RequestParam("familyId") Long familyId) {
+        try {
+            Long currentUserId = UserContext.getCurrentUserId();
+            if (currentUserId == null) {
+                log.warn("[GetFamilyDetail] UserContext 为空，返回 401");
+                return ResponseEntity.status(401).build();
+            }
+            if (familyId == null || familyId <= 0) {
+                return ResponseEntity.badRequest().build();
+            }
+
+            FamilyDetailVO vo = familyService.getFamilyDetail(currentUserId, familyId);
+            return ResponseEntity.ok(vo);
+
+        } catch (IllegalArgumentException e) {
+            log.warn("[GetFamilyDetail] 参数或业务校验失败, msg={}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            log.error("[GetFamilyDetail] 查询家庭详情异常", e);
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    /**
+     * 更新家庭基础信息（仅户主可操作）
+     *
+     * @param request 请求体：familyId、familyName、meetDate(可空)
+     * @return 操作结果
+     */
+    @PostMapping("/update")
+    public ResponseEntity<String> updateFamilyInfo(@RequestBody UpdateFamilyRequest request) {
+        try {
+            Long currentUserId = UserContext.getCurrentUserId();
+            if (currentUserId == null) {
+                log.warn("[UpdateFamilyInfo] UserContext 为空，返回 401");
+                return ResponseEntity.status(401).body(MSG_UNAUTHORIZED);
+            }
+            if (request == null || request.getFamilyId() == null || request.getFamilyId() <= 0
+                    || !StringUtils.hasText(request.getFamilyName())) {
+                return ResponseEntity.badRequest().body("familyId 和 familyName 不能为空");
+            }
+
+            familyService.updateFamilyInfo(currentUserId, request.getFamilyId(), request.getFamilyName(), request.getMeetDate());
+            return ResponseEntity.ok("更新成功");
+
+        } catch (IllegalArgumentException e) {
+            log.warn("[UpdateFamilyInfo] 参数或业务校验失败, msg={}", e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            log.error("[UpdateFamilyInfo] 更新家庭信息异常", e);
+            return ResponseEntity.internalServerError().body("更新失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 创建家庭请求体
      */
     public static class CreateFamilyRequest {
@@ -315,6 +377,39 @@ public class FamilyController {
 
         public void setFamilyMemberId(Long familyMemberId) {
             this.familyMemberId = familyMemberId;
+        }
+    }
+
+    /**
+     * 更新家庭信息请求体
+     */
+    public static class UpdateFamilyRequest {
+        private Long familyId;
+        private String familyName;
+        private String meetDate;
+
+        public Long getFamilyId() {
+            return familyId;
+        }
+
+        public void setFamilyId(Long familyId) {
+            this.familyId = familyId;
+        }
+
+        public String getFamilyName() {
+            return familyName;
+        }
+
+        public void setFamilyName(String familyName) {
+            this.familyName = familyName;
+        }
+
+        public String getMeetDate() {
+            return meetDate;
+        }
+
+        public void setMeetDate(String meetDate) {
+            this.meetDate = meetDate;
         }
     }
 }

@@ -3,6 +3,7 @@ package com.my.family.paxl.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.my.family.paxl.domain.entity.FamilyMemberDO;
 import com.my.family.paxl.domain.vo.FamilyBriefVO;
+import com.my.family.paxl.domain.vo.FamilyMemberBriefVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -75,5 +76,13 @@ public interface FamilyMemberMapper extends BaseMapper<FamilyMemberDO> {
      * @return 成员关系列表（只填充 familyId / userId 字段）
      */
     List<FamilyMemberDO> selectApprovedMembersByFamilyIds(@Param("familyIds") List<Long> familyIds);
+
+    /**
+     * 查询指定家庭下所有已通过（APPROVED）的成员简要信息（含昵称）
+     *
+     * @param familyId 家庭ID
+     * @return 成员简要列表
+     */
+    List<FamilyMemberBriefVO> selectApprovedMemberBriefs(@Param("familyId") Long familyId);
 }
 

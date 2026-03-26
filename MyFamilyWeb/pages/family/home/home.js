@@ -30,6 +30,27 @@ Page({
     approvLoading: false,     // 审批列表加载状态
     pendingMembers: [],       // 待审批成员列表
 
+    // 一级菜单展开状态（登录管理 / 家庭管理）
+    showLoginManagement: false,
+    showFamilyManagement: false,
+
+    // 信息修改
+    showEditInfo: false,         // 信息修改主面板展开状态
+    showEditProfile: false,      // 个人信息（昵称）编辑区展开状态
+    editNickname: '',            // 昵称输入框当前值
+    saveProfileLoading: false,   // 保存昵称按钮 loading 状态
+
+    // 家庭信息编辑
+    showEditFamily: false,
+    editFamilyName: '',
+    editMeetDate: '',
+    saveFamilyLoading: false,
+
+    // 家庭详情弹层
+    showFamilyDetail: false,
+    familyDetailLoading: false,
+    familyDetail: null,
+
     // 提醒相关
     remindCount: 0,           // 活跃提醒数量（红点数字，0 时隐藏悬浮按钮）
     showRemindPanel: false,   // 是否展开提醒浮层
@@ -172,7 +193,11 @@ Page({
     this.setData({
       activeTab: tab,
       showFamilySwitch: false,
-      showApproval: false
+      showApproval: false,
+      showLoginManagement: false,
+      showFamilyManagement: false,
+      showEditInfo: false,
+      showEditProfile: false
     });
   },
 
@@ -181,11 +206,193 @@ Page({
   // ============================
 
   /**
-   * 跳转家庭信息修改页（预留）
+   * 展开/收起 信息修改主面板
    */
-  onEditInfo() {
-    wx.showToast({ title: '信息修改开发中', icon: 'none' });
-    // 后续：wx.navigateTo({ url: '/pages/family/edit/edit' });
+  onToggleEditInfo() {
+    this.setData({
+      showEditInfo: !this.data.showEditInfo,
+      showEditProfile: false,
+      showEditFamily: false,
+      showFamilySwitch: false,
+      showApproval: false,
+      showLoginManagement: false,
+      showFamilyManagement: false
+    });
+  },
+
+  /**
+   * 打开家庭详情弹层（点击概览卡片触发）
+   */
+  onOpenFamilyDetail() {
+    const familyId = this.data.currentFamily && this.data.currentFamily.familyId;
+    if (!familyId) return;
+
+    this.setData({ showFamilyDetail: true, familyDetailLoading: true, familyDetail: null });
+    familyApi.getFamilyDetail(familyId)
+      .then(detail => {
+        const safe = detail || null;
+        if (safe && Array.isArray(safe.members)) {
+          safe.members = safe.members.map(m => {
+            const nickname = (m && m.nickname) ? String(m.nickname) : '';
+            const avatarText = (nickname || '成员').slice(0, 1);
+            return Object.assign({}, m, { avatarText });
+          });
+        }
+        this.setData({ familyDetail: safe, familyDetailLoading: false });
+      })
+      .catch(err => {
+        this.setData({ familyDetailLoading: false });
+        console.error('[Home] 加载家庭详情失败:', err);
+        wx.showToast({ title: '加载家庭详情失败', icon: 'none' });
+      });
+  },
+
+  /**
+   * 关闭家庭详情弹层
+   */
+  onCloseFamilyDetail() {
+    this.setData({ showFamilyDetail: false });
+  },
+
+  /**
+   * 展开/收起 家庭管理主面板
+   */
+  onToggleFamilyManagement() {
+    this.setData({
+      showFamilyManagement: !this.data.showFamilyManagement,
+      showLoginManagement: false,
+      showEditInfo: false,
+      showEditProfile: false,
+      showFamilySwitch: false,
+      showApproval: false
+    });
+  },
+
+  /**
+   * 展开/收起 登录管理主面板
+   */
+  onToggleLoginManagement() {
+    this.setData({
+      showLoginManagement: !this.data.showLoginManagement,
+      showFamilyManagement: false,
+      showEditInfo: false,
+      showEditProfile: false,
+      showFamilySwitch: false,
+      showApproval: false
+    });
+  },
+
+  /**
+   * 展开/收起 个人信息（昵称）编辑区
+   * 展开时预填当前昵称
+   */
+  onToggleEditProfile() {
+    const next = !this.data.showEditProfile;
+    if (next) {
+      const app = getApp();
+      const nickname = (app.globalData.currentUser && app.globalData.currentUser.nickname) || '';
+      this.setData({ showEditProfile: true, showEditFamily: false, editNickname: nickname });
+    } else {
+      this.setData({ showEditProfile: false });
+    }
+  },
+
+  /**
+   * 昵称输入框内容变化
+   */
+  onNicknameInput(e) {
+    this.setData({ editNickname: e.detail.value });
+  },
+
+  /**
+   * 保存昵称
+   * 调用 POST /api/user/updateProfile，成功后更新 globalData 中的用户昵称
+   */
+  onSaveNickname() {
+    const nickname = (this.data.editNickname || '').trim();
+    if (!nickname) {
+      wx.showToast({ title: '昵称不能为空', icon: 'none' });
+      return;
+    }
+
+    this.setData({ saveProfileLoading: true });
+
+    userApi.updateProfile({ nickname })
+      .then(res => {
+        this.setData({
+          saveProfileLoading: false,
+          showEditProfile: false,
+          showEditInfo: false
+        });
+        const app = getApp();
+        if (app.globalData.currentUser) {
+          app.globalData.currentUser.nickname = res.nickname;
+        }
+        wx.showToast({ title: '昵称已更新', icon: 'success', duration: 1500 });
+      })
+      .catch(err => {
+        this.setData({ saveProfileLoading: false });
+        console.error('[Home] 更新昵称失败:', err);
+      });
+  },
+
+  /**
+   * 展开/收起 家庭信息编辑区
+   */
+  onEditFamilyInfo() {
+    const next = !this.data.showEditFamily;
+    if (next) {
+      const current = this.data.currentFamily || {};
+      this.setData({
+        showEditFamily: true,
+        showEditProfile: false,
+        editFamilyName: current.familyName || '',
+        editMeetDate: current.meetDate || ''
+      });
+    } else {
+      this.setData({ showEditFamily: false });
+    }
+  },
+
+  onFamilyNameInput(e) {
+    this.setData({ editFamilyName: e.detail.value });
+  },
+
+  onMeetDateChange(e) {
+    this.setData({ editMeetDate: e.detail.value });
+  },
+
+  onClearMeetDate() {
+    this.setData({ editMeetDate: '' });
+  },
+
+  onSaveFamilyInfo() {
+    const familyId = this.data.currentFamily && this.data.currentFamily.familyId;
+    const familyName = (this.data.editFamilyName || '').trim();
+    const meetDate = (this.data.editMeetDate || '').trim();
+    if (!familyId) return;
+    if (!familyName) {
+      wx.showToast({ title: '家庭名称不能为空', icon: 'none' });
+      return;
+    }
+
+    this.setData({ saveFamilyLoading: true });
+    familyApi.updateFamilyInfo({ familyId, familyName, meetDate: meetDate || null })
+      .then(() => {
+        this.setData({
+          saveFamilyLoading: false,
+          showEditFamily: false,
+          showEditInfo: false
+        });
+        wx.showToast({ title: '已更新', icon: 'success', duration: 1500 });
+        // 重新拉取家庭列表，确保 currentFamily / familyList / togetherDays 同步刷新
+        this._refreshFamilyData();
+      })
+      .catch(err => {
+        this.setData({ saveFamilyLoading: false });
+        console.error('[Home] 更新家庭信息失败:', err);
+        wx.showToast({ title: '更新失败，请重试', icon: 'none' });
+      });
   },
 
   /**
@@ -194,7 +401,9 @@ Page({
   onToggleFamilySwitch() {
     this.setData({
       showFamilySwitch: !this.data.showFamilySwitch,
-      showApproval: false
+      showApproval: false,
+      showEditInfo: false,
+      showEditProfile: false
     });
   },
 
@@ -476,7 +685,9 @@ Page({
     const next = !this.data.showApproval;
     this.setData({
       showApproval: next,
-      showFamilySwitch: false
+      showFamilySwitch: false,
+      showEditInfo: false,
+      showEditProfile: false
     });
     if (next && this.data.pendingMembers.length === 0) {
       this._loadPendingMembers(this.data.currentFamily.familyId, false);
@@ -717,6 +928,31 @@ Page({
         wx.hideLoading();
         console.error('[Home] 忽略提醒失败:', err);
       });
+  },
+
+  /**
+   * 退出登录
+   * 清除本地登录状态，跳转登录页（可重新选择微信登录或临时登录）
+   */
+  onLogout() {
+    wx.showModal({
+      title: '退出登录',
+      content: '确定要退出当前账号吗？退出后可重新选择登录方式。',
+      confirmText: '退出',
+      cancelText: '取消',
+      success: (res) => {
+        if (!res.confirm) return;
+        const app = getApp();
+        if (app && typeof app.clearUserData === 'function') {
+          app.clearUserData();
+        }
+        if (app) {
+          app.globalData.authChecked = true;
+          app.globalData.isTempLogin = false;  // 退出后清除临时登录标记
+        }
+        wx.redirectTo({ url: '/pages/login/login' });
+      }
+    });
   },
 
   /**

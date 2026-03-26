@@ -247,3 +247,53 @@ page {
   color: #fff;
   letter-spacing: 2rpx;
 }
+
+/* 分隔线 */
+.divider-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  margin: 24rpx 0;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.divider-text {
+  font-size: 24rpx;
+  color: #b0bec5;
+  margin: 0 20rpx;
+}
+
+/* 临时登录按钮 */
+.temp-login-btn {
+  width: 100%;
+  height: 88rpx;
+  background: transparent;
+  border-radius: 44rpx;
+  border: 2rpx solid #b0c4d8;
+  box-shadow: none;
+  padding: 0;
+}
+
+.temp-login-btn::after {
+  border: none;
+}
+
+.temp-login-btn-loading {
+  opacity: 0.6;
+}
+
+.temp-login-btn-disabled {
+  opacity: 0.4;
+}
+
+.temp-btn-text {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: #7a8c9c;
+  letter-spacing: 2rpx;
+}

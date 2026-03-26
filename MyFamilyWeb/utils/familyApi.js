@@ -49,6 +49,26 @@ function getMyFamilies() {
 }
 
 /**
+ * 查询家庭详情（名称、编号、成员列表等）
+ *
+ * @param {Number} familyId 家庭ID
+ * @return {Promise<{familyId, familyName, familyCode, memberCount, currentUserRole, members: Array<{userId, nickname, role}>}>}
+ */
+function getFamilyDetail(familyId) {
+  return get('/family/detail', { familyId });
+}
+
+/**
+ * 更新家庭基础信息（仅户主）
+ *
+ * @param {{familyId: number, familyName: string, meetDate?: string}} data
+ * @return {Promise<string>}
+ */
+function updateFamilyInfo(data) {
+  return post('/family/update', data);
+}
+
+/**
  * 户主查询待审批成员列表
  *
  * @param {Number} familyId 家庭ID
@@ -85,6 +105,8 @@ module.exports = {
   getFamilyByCode,
   joinFamily,
   getMyFamilies,
+  getFamilyDetail,
+  updateFamilyInfo,
   getPendingMembers,
   approveJoin,
   rejectJoin

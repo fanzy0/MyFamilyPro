@@ -27,7 +27,13 @@ function cloudRequest(options) {
       'content-type': 'application/json'
     };
 
-    // 合并请求头
+    // 临时登录模式：所有请求自动携带 TEMP-OPENID，确保后续接口也以临时账号身份鉴权
+    const app = getApp();
+    if (app && app.globalData && app.globalData.isTempLogin) {
+      defaultHeader['TEMP-OPENID'] = 'QINGJUXUNUAN001';
+    }
+
+    // 合并请求头（options.header 可覆盖 defaultHeader）
     const header = Object.assign({}, defaultHeader, options.header || {});
 
     console.log(`[CloudRequest] 开始请求: ${options.method} ${fullPath}`);
@@ -92,13 +98,15 @@ function get(path, params) {
  * POST请求
  * @param {String} path 请求路径
  * @param {Object} data 请求数据
+ * @param {Object} header 附加请求头（可选）
  * @return {Promise}
  */
-function post(path, data) {
+function post(path, data, header) {
   return cloudRequest({
     path: path,
     method: 'POST',
-    data: data
+    data: data,
+    header: header
   });
 }
 

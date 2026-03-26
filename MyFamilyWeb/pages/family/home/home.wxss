@@ -387,6 +387,18 @@ page {
   flex-direction: column;
 }
 
+.my-profile-arrow {
+  font-size: 44rpx;
+  color: #c8d8e4;
+  font-weight: 300;
+  margin-left: 8rpx;
+  flex-shrink: 0;
+}
+
+.my-profile-card:active {
+  background: #f8fafc;
+}
+
 .my-family-name {
   font-size: 28rpx;
   font-weight: 600;
@@ -399,6 +411,220 @@ page {
   font-size: 22rpx;
   color: #9fb8cc;
   line-height: 1.4;
+}
+
+/* ============================
+   家庭详情弹层
+   ============================ */
+.family-detail-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 999;
+}
+
+.family-detail-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 640rpx;
+  max-height: 78vh;
+  background: #fff;
+  border-radius: 24rpx;
+  z-index: 1000;
+  overflow: hidden;
+  box-shadow: 0 16rpx 60rpx rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+}
+
+.family-detail-header {
+  padding: 28rpx 28rpx 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1rpx solid #edf1f7;
+}
+
+.family-detail-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #1a2740;
+}
+
+.family-detail-close {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 28rpx;
+  background: #f4f7fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.family-detail-close-text {
+  font-size: 26rpx;
+  color: #7a8c9c;
+}
+
+.family-detail-body {
+  padding: 20rpx 24rpx 24rpx;
+  flex: 1;
+  min-height: 0;
+}
+
+.family-detail-loading,
+.family-detail-empty {
+  padding: 60rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.family-detail-spinner {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  border: 6rpx solid #f0f4f8;
+  border-top-color: #4facfe;
+  animation: spin 0.8s linear infinite;
+}
+
+.family-detail-loading-text,
+.family-detail-empty-text {
+  font-size: 26rpx;
+  color: #8a9bb0;
+}
+
+.family-detail-card {
+  background: #f8fafd;
+  border-radius: 20rpx;
+  padding: 18rpx 18rpx 6rpx;
+  border: 1rpx solid #edf1f7;
+}
+
+.family-detail-row {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 8rpx;
+  border-bottom: 1rpx solid #edf1f7;
+}
+
+.family-detail-row-last {
+  border-bottom: none;
+}
+
+.family-detail-label {
+  width: 96rpx;
+  flex-shrink: 0;
+  font-size: 24rpx;
+  color: #7a8c9c;
+}
+
+.family-detail-value {
+  flex: 1;
+  font-size: 26rpx;
+  color: #1a2740;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.family-detail-code {
+  flex: 1;
+  font-size: 26rpx;
+  color: #1a2740;
+  font-weight: 600;
+  letter-spacing: 2rpx;
+}
+
+.family-detail-copy {
+  flex-shrink: 0;
+  margin-left: 12rpx;
+  padding: 8rpx 14rpx;
+  border-radius: 16rpx;
+  background: rgba(79, 172, 254, 0.12);
+}
+
+.family-detail-copy-text {
+  font-size: 22rpx;
+  color: #4facfe;
+  font-weight: 600;
+}
+
+.family-detail-members {
+  margin-top: 18rpx;
+}
+
+.family-detail-members-title {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: #1a2740;
+  margin: 10rpx 4rpx 14rpx;
+}
+
+.family-detail-members-scroll {
+  max-height: 360rpx;
+}
+
+.family-detail-member {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 8rpx;
+  border-bottom: 1rpx solid #edf1f7;
+}
+
+.family-detail-member:last-child {
+  border-bottom: none;
+}
+
+.family-detail-member-avatar {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #d7eef8, #a8d4f0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 18rpx;
+}
+
+.family-detail-member-avatar-text {
+  font-size: 30rpx;
+  color: #1a2740;
+  font-weight: 700;
+}
+
+.family-detail-member-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.family-detail-member-name {
+  font-size: 26rpx;
+  color: #1a2740;
+  font-weight: 600;
+  max-width: 360rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.family-detail-member-role {
+  font-size: 22rpx;
+  color: #9fb8cc;
+  flex-shrink: 0;
+  margin-left: 12rpx;
 }
 
 /* ============================
@@ -504,6 +730,13 @@ page {
   background: #f8fafd;
   border-top: 1rpx solid #edf1f7;
   padding: 8rpx 36rpx 20rpx;
+}
+
+/* expand-panel 的嵌套版本：用于父级面板内部的二级展开内容 */
+.expand-panel-inner {
+  background: transparent;
+  border-top: none;
+  padding: 0;
 }
 
 /* 家庭切换列表项 */
@@ -1054,6 +1287,182 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* ============================================================
+   信息修改 — 子选项与昵称编辑区
+   ============================================================ */
+
+/* 子选项行（修改个人信息 / 修改家庭信息） */
+.edit-sub-item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  /* 二级项加了左侧图标后：与父级保持同一内边距风格 */
+  padding: 28rpx 36rpx;
+  border-bottom: 1rpx solid #edf1f7;
+  box-sizing: border-box;
+}
+
+.edit-sub-item:active {
+  background: #f8fafc;
+}
+
+.edit-sub-item-last {
+  border-bottom: none;
+}
+
+.edit-sub-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1a2740;
+  letter-spacing: 1rpx;
+  flex: 1;
+  white-space: nowrap;
+}
+
+.edit-sub-arrow {
+  /* 与父级 my-item-arrow 保持一致的视觉与旋转手感 */
+  font-size: 44rpx;
+  color: #c8d8e4;
+  font-weight: 300;
+  flex-shrink: 0;
+  transition: transform 0.25s ease;
+  display: inline-block;
+}
+
+/* 昵称编辑区容器 */
+.edit-profile-panel {
+  background: #fff;
+  border-radius: 16rpx;
+  margin: 8rpx 0 12rpx;
+  padding: 24rpx 20rpx 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 字段行：label + input 横排 */
+.edit-field-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  /* 该字段行后紧跟“保存昵称”，避免底部分隔线/间距造成“多一行”的错觉 */
+  padding: 0 0 12rpx;
+  border-bottom: none;
+  margin-bottom: 16rpx;
+}
+
+.edit-field-row-last {
+  margin-bottom: 18rpx;
+}
+
+/* picker 组件直接作为 flex 子项：强制 flex:1 参与横向布局 */
+.edit-meet-picker {
+  flex: 1;
+  min-width: 0;
+}
+
+/* picker 内部触发区：display:flex + nowrap 确保文字与箭头同行 */
+.edit-picker-trigger {
+  display: flex;
+  align-items: center;
+  height: 56rpx;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.edit-picker-text {
+  font-size: 26rpx;
+  color: #2c3e50;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.edit-picker-placeholder {
+  color: #c0ccd8;
+}
+
+.edit-picker-arrow {
+  font-size: 40rpx;
+  color: #c8d8e4;
+  font-weight: 300;
+  flex-shrink: 0;
+  margin-left: 8rpx;
+}
+
+.edit-picker-clear {
+  flex-shrink: 0;
+  margin-left: 8rpx;
+  padding: 6rpx 10rpx;
+  border-radius: 16rpx;
+  background: #f0f4f8;
+}
+
+.edit-picker-clear-text {
+  font-size: 20rpx;
+  color: #7a8c9c;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.edit-field-label {
+  font-size: 26rpx;
+  color: #7a8c9c;
+  flex-shrink: 0;
+  width: 80rpx;
+  white-space: nowrap;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+}
+
+
+.edit-field-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #2c3e50;
+  height: 56rpx;
+  line-height: 56rpx;
+}
+
+.edit-field-placeholder {
+  color: #c0ccd8;
+}
+
+/* 保存按钮 */
+.edit-save-btn {
+  width: 100%;
+  height: 76rpx;
+  background: linear-gradient(135deg, #5eb8ff 0%, #4facfe 100%);
+  border-radius: 38rpx;
+  border: none;
+  box-shadow: 0 4rpx 16rpx rgba(79, 172, 254, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  white-space: nowrap;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+  letter-spacing: 2rpx;
+  padding: 0;
+}
+
+.edit-save-btn::after {
+  border: none;
+}
+
+.edit-save-btn-loading {
+  background: linear-gradient(135deg, #a8d4f8 0%, #90c4f4 100%);
+  box-shadow: none;
+}
+
+/* 退出登录 */
+.logout-bg {
+  background: linear-gradient(135deg, #e8f0f8, #c8d8f0);
 }
 
 /* 注销账号 */

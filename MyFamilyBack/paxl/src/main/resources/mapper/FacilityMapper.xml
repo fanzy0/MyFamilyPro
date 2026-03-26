@@ -70,5 +70,14 @@
         WHERE id = #{familyId}
     </update>
 
+    <!-- 更新家庭基础信息（名称、相识日期） -->
+    <update id="updateFamilyInfo">
+        UPDATE mf_family
+        SET family_name = #{familyName},
+            meet_date   = #{meetDate},
+            update_time = NOW()
+        WHERE id = #{familyId}
+    </update>
+
 </mapper>
 

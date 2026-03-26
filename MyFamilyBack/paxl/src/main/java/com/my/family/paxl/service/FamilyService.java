@@ -3,6 +3,7 @@ package com.my.family.paxl.service;
 import com.my.family.paxl.domain.entity.FamilyDO;
 import com.my.family.paxl.domain.entity.FamilyMemberDO;
 import com.my.family.paxl.domain.vo.FamilyBriefVO;
+import com.my.family.paxl.domain.vo.FamilyDetailVO;
 
 import java.util.List;
 
@@ -75,5 +76,24 @@ public interface FamilyService {
      * @return 家庭简要信息列表
      */
     List<FamilyBriefVO> listMyFamilies(Long userId);
+
+    /**
+     * 查询家庭详情（仅限当前用户已加入的家庭）
+     *
+     * @param userId   当前用户ID
+     * @param familyId 家庭ID
+     * @return 家庭详情（含成员列表）
+     */
+    FamilyDetailVO getFamilyDetail(Long userId, Long familyId);
+
+    /**
+     * 更新家庭基础信息（仅户主可操作）
+     *
+     * @param ownerUserId 户主用户ID
+     * @param familyId    家庭ID
+     * @param familyName  家庭名称
+     * @param meetDate    相识相遇日期（可为空，格式 YYYY-MM-DD）
+     */
+    void updateFamilyInfo(Long ownerUserId, Long familyId, String familyName, String meetDate);
 }
 

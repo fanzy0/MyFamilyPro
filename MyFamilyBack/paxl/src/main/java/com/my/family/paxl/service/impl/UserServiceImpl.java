@@ -1,5 +1,6 @@
 package com.my.family.paxl.service.impl;
 
+import cn.hutool.core.util.RandomUtil;
 import com.my.family.paxl.domain.entity.UserDO;
 import com.my.family.paxl.domain.vo.FamilyBriefVO;
 import com.my.family.paxl.domain.vo.LoginResponseVO;
@@ -47,6 +48,7 @@ public class UserServiceImpl implements UserService {
             user = new UserDO();
             user.setOpenid(openid);
             user.setStatus(UserDO.STATUS_NORMAL);
+            user.setNickname("访客"+ RandomUtil.randomInt(1000, 9999));
             user.setLastLoginTime(now);
             user.setCreateTime(now);
             user.setUpdateTime(now);

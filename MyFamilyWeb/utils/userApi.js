@@ -17,6 +17,18 @@ function login() {
 }
 
 /**
+ * 临时账号登录
+ * 复用 /auth/login 接口，通过自定义 Header TEMP-OPENID 传递固定临时账号 ID
+ * 后端 AuthInterceptor 读取该 Header 作为 openid 兜底，后续流程与正常登录完全一致
+ * 后端用户表中需维护一条 openId 为 QINGJUXUNUAN001 的临时账号记录
+ *
+ * @return {Promise<{user: Object, familyList: Array}>} 登录响应
+ */
+function tempLogin() {
+  return post('/auth/login', {}, { 'TEMP-OPENID': 'QINGJUXUNUAN001' });
+}
+
+/**
  * 获取当前用户信息
  * 用于 app.onLaunch 中校验用户是否已在系统中注册，同时获取最新用户信息
  * X-WX-OPENID 由云托管自动携带，无需前端传递
@@ -54,6 +66,7 @@ function deactivateAccount() {
 
 module.exports = {
   login,
+  tempLogin,
   getMe,
   updateProfile,
   deactivateAccount

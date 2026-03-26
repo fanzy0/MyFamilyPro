@@ -118,6 +118,10 @@ utils/
 - 遵循微信小程序设计规范的尺寸和颜色
 - 样式命名使用kebab-case（`header-title`）
 - 避免使用内联样式，优先使用class
+- 遇到“手机端比电脑多一行/断行/错位”的排查优先级：
+  - 若父级容器需要换行（如多个`text`拼接），不要只写`flex-wrap`，务必同时保证容器为对应的布局模式（例如 `display:flex` + `flex-wrap: wrap`）。
+  - 对按钮或单行文案，补充 `display:flex` 居中并设置 `white-space: nowrap`，避免窄屏文本被拆行。
+  - 若字段行/分隔线紧跟按钮，处理末尾 `border-bottom` / `margin-bottom`（可用 `:last-child` 或禁用边框/间距），避免视觉上出现“多一行”的错觉。
 
 ```css
 /* 示例 */

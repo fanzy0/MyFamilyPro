@@ -1,5 +1,10 @@
 package com.my.family.paxl.domain.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -10,6 +15,10 @@ import java.time.LocalDateTime;
  * @author ai
  * @date 2026/03/13
  */
+@Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class FamilyMemberDO implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -70,6 +79,11 @@ public class FamilyMemberDO implements Serializable {
     private String joinStatus;
 
     /**
+     * 昵称
+     */
+    private String nickname;
+
+    /**
      * 加入时间（审批通过时间）
      */
     private LocalDateTime joinTime;
@@ -84,68 +98,6 @@ public class FamilyMemberDO implements Serializable {
      */
     private LocalDateTime updateTime;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getFamilyId() {
-        return familyId;
-    }
-
-    public void setFamilyId(Long familyId) {
-        this.familyId = familyId;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    public String getJoinStatus() {
-        return joinStatus;
-    }
-
-    public void setJoinStatus(String joinStatus) {
-        this.joinStatus = joinStatus;
-    }
-
-    public LocalDateTime getJoinTime() {
-        return joinTime;
-    }
-
-    public void setJoinTime(LocalDateTime joinTime) {
-        this.joinTime = joinTime;
-    }
-
-    public LocalDateTime getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(LocalDateTime createTime) {
-        this.createTime = createTime;
-    }
-
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
 }
 

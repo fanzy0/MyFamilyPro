@@ -131,13 +131,71 @@
     <view class="tab-content" wx:if="{{activeTab === 'my'}}">
 
       <!-- 家庭信息概览卡 -->
-      <view class="my-profile-card">
+      <view class="my-profile-card" bindtap="onOpenFamilyDetail">
         <view class="my-avatar">
           <text class="my-avatar-icon">👤</text>
         </view>
         <view class="my-profile-info">
           <text class="my-family-name">{{currentFamily.familyName}}</text>
           <text class="my-role-text">{{currentFamily.role === 'OWNER' ? '户主' : '成员'}} · {{currentFamily.memberCount}} 位成员</text>
+        </view>
+        <text class="my-profile-arrow">›</text>
+      </view>
+
+      <!-- 家庭详情弹层 -->
+      <view class="family-detail-mask" wx:if="{{showFamilyDetail}}" bindtap="onCloseFamilyDetail"></view>
+      <view class="family-detail-panel" wx:if="{{showFamilyDetail}}">
+        <view class="family-detail-header">
+          <text class="family-detail-title">家庭详情</text>
+          <view class="family-detail-close" bindtap="onCloseFamilyDetail">
+            <text class="family-detail-close-text">✕</text>
+          </view>
+        </view>
+
+        <view class="family-detail-body">
+          <view class="family-detail-loading" wx:if="{{familyDetailLoading}}">
+            <view class="family-detail-spinner"></view>
+            <text class="family-detail-loading-text">加载中...</text>
+          </view>
+
+          <view wx:elif="{{!familyDetailLoading && !familyDetail}}" class="family-detail-empty">
+            <text class="family-detail-empty-text">暂无家庭详情</text>
+          </view>
+
+          <view wx:else>
+            <view class="family-detail-card">
+              <view class="family-detail-row">
+                <text class="family-detail-label">名称</text>
+                <text class="family-detail-value">{{familyDetail.familyName}}</text>
+              </view>
+              <view class="family-detail-row">
+                <text class="family-detail-label">编号</text>
+                <text class="family-detail-code">{{familyDetail.familyCode}}</text>
+                <view class="family-detail-copy" bindtap="onCopyCode">
+                  <text class="family-detail-copy-text">复制</text>
+                </view>
+              </view>
+              <view class="family-detail-row family-detail-row-last">
+                <text class="family-detail-label">成员</text>
+                <text class="family-detail-value">{{familyDetail.memberCount}} 位</text>
+              </view>
+            </view>
+
+            <view class="family-detail-members">
+              <text class="family-detail-members-title">成员列表</text>
+              <scroll-view scroll-y class="family-detail-members-scroll">
+                <view class="family-detail-member" wx:for="{{familyDetail.members}}" wx:key="userId">
+                  <view class="family-detail-member-avatar">
+                    <text class="family-detail-member-avatar-text">{{item.avatarText}}</text>
+                  </view>
+                  <view class="family-detail-member-info">
+                    <text class="family-detail-member-name">{{item.nickname || '未设置昵称'}}</text>
+                    <text class="family-detail-member-role">{{item.role === 'OWNER' ? '户主' : '成员'}}</text>
+                  </view>
+                </view>
+              </scroll-view>
+            </view>
+          </view>
         </view>
       </view>
 
@@ -146,113 +204,198 @@
 
         <!-- 信息修改 -->
         <view class="my-group">
-          <view class="my-item" bindtap="onEditInfo">
+          <view class="my-item" bindtap="onToggleEditInfo">
             <view class="my-item-icon edit-bg">✏️</view>
             <view class="my-item-content">
               <text class="my-item-title">信息修改</text>
-              <text class="my-item-desc">修改家庭名称、相遇时间等</text>
+              <text class="my-item-desc">修改个人昵称、家庭信息等</text>
             </view>
-            <text class="my-item-arrow">›</text>
+            <text class="my-item-arrow {{showEditInfo ? 'arrow-rotate' : ''}}">›</text>
           </view>
-        </view>
 
-        <!-- 家庭切换 -->
-        <view class="my-group">
-          <view class="my-item" bindtap="onToggleFamilySwitch">
-            <view class="my-item-icon switch-bg">🔄</view>
-            <view class="my-item-content">
-              <text class="my-item-title">家庭切换</text>
-              <text class="my-item-desc">当前：{{currentFamily.familyName}}</text>
+          <!-- 展开面板：选择修改类型 -->
+          <view class="expand-panel" wx:if="{{showEditInfo}}">
+
+            <!-- 子选项：修改个人信息 -->
+            <view class="edit-sub-item" bindtap="onToggleEditProfile">
+              <view class="my-item-icon edit-bg">✍️</view>
+              <text class="edit-sub-label">修改个人信息</text>
+              <text class="edit-sub-arrow {{showEditProfile ? 'arrow-rotate' : ''}}">›</text>
             </view>
-            <text class="my-item-arrow {{showFamilySwitch ? 'arrow-rotate' : ''}}">›</text>
-          </view>
-          <!-- 家庭列表展开 -->
-          <view class="expand-panel" wx:if="{{showFamilySwitch}}">
-            <view
-              class="family-switch-item {{item.familyId === currentFamily.familyId ? 'family-switch-active' : ''}}"
-              wx:for="{{familyList}}"
-              wx:key="familyId"
-              bindtap="onSwitchFamily"
-              data-family-id="{{item.familyId}}"
-            >
-              <view class="radio-wrap">
-                <view class="radio-outer {{item.familyId === currentFamily.familyId ? 'radio-outer-checked' : ''}}">
-                  <view class="radio-inner" wx:if="{{item.familyId === currentFamily.familyId}}"></view>
+
+            <!-- 昵称编辑区 -->
+            <view class="edit-profile-panel" wx:if="{{showEditProfile}}">
+              <view class="edit-field-row">
+                <text class="edit-field-label">昵称</text>
+                <input
+                  class="edit-field-input"
+                  type="nickname"
+                  value="{{editNickname}}"
+                  placeholder="请输入昵称"
+                  placeholder-class="edit-field-placeholder"
+                  bindinput="onNicknameInput"
+                  maxlength="20"
+                  confirm-type="done"
+                />
+              </view>
+              <button
+                class="edit-save-btn {{saveProfileLoading ? 'edit-save-btn-loading' : ''}}"
+                bindtap="onSaveNickname"
+                disabled="{{saveProfileLoading}}"
+              >{{saveProfileLoading ? '保存中...' : '保存昵称'}}</button>
+            </view>
+
+            <!-- 子选项：修改家庭信息（预留） -->
+            <view class="edit-sub-item edit-sub-item-last" bindtap="onEditFamilyInfo">
+              <view class="my-item-icon switch-bg">📝</view>
+              <text class="edit-sub-label">修改家庭信息</text>
+              <text class="edit-sub-arrow {{showEditFamily ? 'arrow-rotate' : ''}}">›</text>
+            </view>
+
+            <!-- 家庭信息编辑区 -->
+            <view class="edit-profile-panel" wx:if="{{showEditFamily}}">
+              <view class="edit-field-row">
+                <text class="edit-field-label">名称</text>
+                <input
+                  class="edit-field-input"
+                  value="{{editFamilyName}}"
+                  placeholder="请输入家庭名称"
+                  placeholder-class="edit-field-placeholder"
+                  bindinput="onFamilyNameInput"
+                  maxlength="64"
+                  confirm-type="done"
+                />
+              </view>
+
+              <view class="edit-field-row edit-field-row-last">
+                <text class="edit-field-label">相遇</text>
+                <picker
+                  class="edit-meet-picker"
+                  mode="date"
+                  value="{{editMeetDate}}"
+                  bindchange="onMeetDateChange"
+                >
+                  <view class="edit-picker-trigger">
+                    <text class="edit-picker-text {{editMeetDate ? '' : 'edit-picker-placeholder'}}">{{editMeetDate || '请选择日期（可不选）'}}</text>
+                    <text class="edit-picker-arrow">›</text>
+                  </view>
+                </picker>
+                <view class="edit-picker-clear" wx:if="{{editMeetDate}}" catchtap="onClearMeetDate">
+                  <text class="edit-picker-clear-text">清空</text>
                 </view>
               </view>
-              <text class="family-switch-name">{{item.familyName}}</text>
-              <text class="family-switch-badge">{{item.role === 'OWNER' ? '户主' : '成员'}}</text>
+
+              <button
+                class="edit-save-btn {{saveFamilyLoading ? 'edit-save-btn-loading' : ''}}"
+                bindtap="onSaveFamilyInfo"
+                disabled="{{saveFamilyLoading}}"
+              >{{saveFamilyLoading ? '保存中...' : '保存家庭信息'}}</button>
             </view>
+
           </view>
         </view>
 
-        <!-- 成员审批（仅户主） -->
-        <view class="my-group" wx:if="{{isOwner}}">
-          <view class="my-item" bindtap="onToggleApproval">
-            <view class="my-item-icon approve-bg">👥</view>
-            <view class="my-item-content">
-              <text class="my-item-title">成员审批</text>
-              <text class="my-item-desc">{{pendingMembers.length > 0 ? '有 ' + pendingMembers.length + ' 条待处理申请' : '暂无待审批申请'}}</text>
-            </view>
-            <view class="badge-wrap" wx:if="{{pendingMembers.length > 0 && !showApproval}}">
-              <text class="badge-dot">{{pendingMembers.length}}</text>
-            </view>
-            <text class="my-item-arrow {{showApproval ? 'arrow-rotate' : ''}}">›</text>
-          </view>
-          <!-- 审批列表展开 -->
-          <view class="expand-panel" wx:if="{{showApproval}}">
-            <view wx:if="{{approvLoading}}" class="approval-loading">
-              <text>加载中...</text>
-            </view>
-            <view wx:elif="{{pendingMembers.length === 0}}" class="approval-empty">
-              <text>暂无待审批成员 🎉</text>
-            </view>
-            <view class="approval-item" wx:for="{{pendingMembers}}" wx:key="familyMemberId">
-              <view class="approval-avatar">
-                <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" class="approval-avatar-img" mode="aspectFill"></image>
-                <text wx:else class="approval-avatar-text">{{item.nickname.substring(0,1)}}</text>
-              </view>
-              <view class="approval-info">
-                <text class="approval-name">{{item.nickname}}</text>
-                <text class="approval-time">{{item.applyTime}}</text>
-              </view>
-              <view class="approval-actions">
-                <view
-                  class="btn-approve"
-                  bindtap="onApprove"
-                  data-member-id="{{item.familyMemberId}}"
-                >通过</view>
-                <view
-                  class="btn-reject"
-                  bindtap="onReject"
-                  data-member-id="{{item.familyMemberId}}"
-                >拒绝</view>
-              </view>
-            </view>
-          </view>
-        </view>
-
-        <!-- 加入 / 创建家庭 -->
+        <!-- 一级菜单：家庭管理 -->
         <view class="my-group">
-          <view class="my-item" bindtap="onAddFamilyTap">
-            <view class="my-item-icon add-bg">➕</view>
+          <view class="my-item" bindtap="onToggleFamilyManagement">
+            <view class="my-item-icon switch-bg">🏠</view>
             <view class="my-item-content">
-              <text class="my-item-title">加入 / 创建家庭</text>
-              <text class="my-item-desc">加入新家庭或创建自己的家庭</text>
+              <text class="my-item-title">家庭管理</text>
+              <text class="my-item-desc">家庭切换、成员审批、加入/创建</text>
             </view>
-            <text class="my-item-arrow">›</text>
+            <text class="my-item-arrow {{showFamilyManagement ? 'arrow-rotate' : ''}}">›</text>
+          </view>
+
+          <view class="expand-panel" wx:if="{{showFamilyManagement}}">
+            <!-- 二级菜单：家庭切换 -->
+            <view class="edit-sub-item" bindtap="onToggleFamilySwitch">
+              <view class="my-item-icon switch-bg">🔄</view>
+              <text class="edit-sub-label">家庭切换</text>
+              <text class="edit-sub-arrow {{showFamilySwitch ? 'arrow-rotate' : ''}}">›</text>
+            </view>
+
+            <view class="expand-panel expand-panel-inner" wx:if="{{showFamilySwitch}}">
+              <view
+                class="family-switch-item {{item.familyId === currentFamily.familyId ? 'family-switch-active' : ''}}"
+                wx:for="{{familyList}}"
+                wx:key="familyId"
+                bindtap="onSwitchFamily"
+                data-family-id="{{item.familyId}}"
+              >
+                <view class="radio-wrap">
+                  <view class="radio-outer {{item.familyId === currentFamily.familyId ? 'radio-outer-checked' : ''}}">
+                    <view class="radio-inner" wx:if="{{item.familyId === currentFamily.familyId}}"></view>
+                  </view>
+                </view>
+                <text class="family-switch-name">{{item.familyName}}</text>
+                <text class="family-switch-badge">{{item.role === 'OWNER' ? '户主' : '成员'}}</text>
+              </view>
+            </view>
+
+            <!-- 二级菜单：成员审批（仅户主） -->
+            <view class="edit-sub-item" wx:if="{{isOwner}}" bindtap="onToggleApproval">
+              <view class="my-item-icon approve-bg">👥</view>
+              <text class="edit-sub-label">成员审批</text>
+              <text class="edit-sub-arrow {{showApproval ? 'arrow-rotate' : ''}}">›</text>
+            </view>
+
+            <view class="expand-panel expand-panel-inner" wx:if="{{showApproval}}">
+              <view wx:if="{{approvLoading}}" class="approval-loading">
+                <text>加载中...</text>
+              </view>
+              <view wx:elif="{{pendingMembers.length === 0}}" class="approval-empty">
+                <text>暂无待审批成员 🎉</text>
+              </view>
+              <view class="approval-item" wx:for="{{pendingMembers}}" wx:key="id">
+                <view class="approval-avatar">
+                  <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" class="approval-avatar-img" mode="aspectFill"></image>
+                  <text wx:else class="approval-avatar-text">{{item.nickname.substring(0,1)}}</text>
+                </view>
+                <view class="approval-info">
+                  <text class="approval-name">{{item.nickname}}</text>
+                  <text class="approval-time">{{item.applyTime}}</text>
+                </view>
+                <view class="approval-actions">
+                  <view class="btn-approve" bindtap="onApprove" data-member-id="{{item.id}}">通过</view>
+                  <view class="btn-reject" bindtap="onReject" data-member-id="{{item.id}}">拒绝</view>
+                </view>
+              </view>
+            </view>
+
+            <!-- 二级菜单：加入/创建家庭 -->
+            <view class="edit-sub-item edit-sub-item-last" bindtap="onAddFamilyTap">
+              <view class="my-item-icon add-bg">➕</view>
+              <text class="edit-sub-label">加入/创建家庭</text>
+              <text class="edit-sub-arrow">›</text>
+            </view>
           </view>
         </view>
 
-        <!-- 注销账号 -->
+        <!-- 一级菜单：登录管理 -->
         <view class="my-group">
-          <view class="my-item my-item-danger" bindtap="onDeactivateAccount">
-            <view class="my-item-icon deactivate-bg">🚪</view>
+          <view class="my-item" bindtap="onToggleLoginManagement">
+            <view class="my-item-icon logout-bg">🔐</view>
             <view class="my-item-content">
-              <text class="my-item-title my-item-title-danger">注销账号</text>
-              <text class="my-item-desc">注销后账号将被禁用，需要重新授权登录</text>
+              <text class="my-item-title">登录管理</text>
+              <text class="my-item-desc">退出登录与账号注销</text>
             </view>
-            <text class="my-item-arrow">›</text>
+            <text class="my-item-arrow {{showLoginManagement ? 'arrow-rotate' : ''}}">›</text>
+          </view>
+
+          <view class="expand-panel" wx:if="{{showLoginManagement}}">
+            <!-- 二级菜单：退出登录 -->
+            <view class="edit-sub-item" bindtap="onLogout">
+              <view class="my-item-icon logout-bg">🚶</view>
+              <text class="edit-sub-label">退出登录</text>
+              <text class="edit-sub-arrow">›</text>
+            </view>
+
+            <!-- 二级菜单：注销账号 -->
+            <view class="edit-sub-item edit-sub-item-last" bindtap="onDeactivateAccount">
+              <view class="my-item-icon deactivate-bg">🚪</view>
+              <text class="edit-sub-label">注销账号</text>
+              <text class="edit-sub-arrow">›</text>
+            </view>
           </view>
         </view>
 

@@ -34,6 +34,12 @@ public class AuthInterceptor implements HandlerInterceptor {
      */
     private static final String HEADER_WX_OPENID = "X-WX-OPENID";
 
+    /**
+     * 临时账号登录使用的自定义 Header 名称
+     * 当 X-WX-OPENID 为空时（如临时体验账号场景），读取此 Header 作为 openid 兜底
+     */
+    private static final String HEADER_TEMP_OPENID = "TEMP-OPENID";
+
     private final UserService userService;
     private final ObjectMapper objectMapper;
 
@@ -44,7 +50,17 @@ public class AuthInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String openid = request.getHeader(HEADER_WX_OPENID);
+        // TEMP-OPENID 优先级高于 X-WX-OPENID：
+        // wx.cloud.callContainer 会始终注入真实的 X-WX-OPENID，
+        // 临时登录场景下需要用 TEMP-OPENID 覆盖，因此先检查 TEMP-OPENID
+        String tempOpenid = request.getHeader(HEADER_TEMP_OPENID);
+        String openid;
+        if (StringUtils.hasText(tempOpenid)) {
+            openid = tempOpenid;
+            log.info("[AuthInterceptor] 使用临时账号 TEMP-OPENID 登录, uri={}", request.getRequestURI());
+        } else {
+            openid = request.getHeader(HEADER_WX_OPENID);
+        }
 
         if (!StringUtils.hasText(openid)) {
             log.warn("[AuthInterceptor] X-WX-OPENID 为空，拒绝请求, uri={}", request.getRequestURI());

@@ -6,9 +6,10 @@ Page({
    * 页面的初始数据
    */
   data: {
-    loading: true,      // 是否正在进行自动登录校验（展示 loading 遮罩）
-    loginLoading: false, // 是否正在进行手动登录（按钮 loading 状态）
-    agreed: false       // 是否已勾选用户协议
+    loading: true,           // 是否正在进行自动登录校验（展示 loading 遮罩）
+    loginLoading: false,     // 是否正在进行微信一键登录（按钮 loading 状态）
+    tempLoginLoading: false, // 是否正在进行临时登录（按钮 loading 状态）
+    agreed: false            // 是否已勾选用户协议
   },
 
   /**
@@ -116,6 +117,58 @@ Page({
         this.setData({ loginLoading: false });
         wx.showToast({
           title: '登录失败，请稍后重试',
+          icon: 'none',
+          duration: 2000
+        });
+      });
+  },
+
+  /**
+   * 点击"临时登录"按钮
+   * 弹出提示告知用户当前为临时账号，确认后使用固定 ID 完成登录
+   */
+  onTempLoginTap() {
+    if (this.data.tempLoginLoading) return;
+
+    wx.showModal({
+      title: '临时账号提示',
+      content: '您当前使用的是临时账号，请勿上传您个人图片等信息',
+      confirmText: '我知道了',
+      cancelText: '取消',
+      success: (res) => {
+        if (res.confirm) {
+          this._doTempLogin();
+        }
+      }
+    });
+  },
+
+  /**
+   * 执行临时登录请求
+   * 向后端传递固定 ID QINGJUXUNUAN001，后端以此查询临时账号信息
+   */
+  _doTempLogin() {
+    this.setData({ tempLoginLoading: true });
+    console.log('[Login] 开始临时登录');
+
+    userApi.tempLogin()
+      .then(res => {
+        console.log('[Login] 临时登录成功, userId=' + res.user.id);
+
+        const app = getApp();
+        app.globalData.currentUser = res.user;
+        app.globalData.familyList = res.familyList || [];
+        app.globalData.isLoggedIn = true;
+        app.globalData.authChecked = true;
+        app.globalData.isTempLogin = true;  // 标记临时登录，后续所有请求自动携带 TEMP-OPENID
+
+        this._navigateToMain();
+      })
+      .catch(err => {
+        console.error('[Login] 临时登录失败:', err);
+        this.setData({ tempLoginLoading: false });
+        wx.showToast({
+          title: '临时登录失败，请稍后重试',
           icon: 'none',
           duration: 2000
         });

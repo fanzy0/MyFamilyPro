@@ -28,6 +28,11 @@ public class AuthController {
      */
     private static final String HEADER_WX_OPENID = "X-WX-OPENID";
 
+    /**
+     * 临时账号登录使用的自定义 Header 名称，优先级高于 X-WX-OPENID
+     */
+    private static final String HEADER_TEMP_OPENID = "TEMP-OPENID";
+
     private final UserService userService;
 
     public AuthController(UserService userService) {
@@ -44,11 +49,19 @@ public class AuthController {
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponseVO> login(HttpServletRequest request) {
-        String openid = request.getHeader(HEADER_WX_OPENID);
+        // TEMP-OPENID 优先级高于 X-WX-OPENID，与 AuthInterceptor 保持一致
+        String tempOpenid = request.getHeader(HEADER_TEMP_OPENID);
+        String openid;
+        if (StringUtils.hasText(tempOpenid)) {
+            openid = tempOpenid;
+            log.info("[Login] 使用临时账号 TEMP-OPENID 登录");
+        } else {
+            openid = request.getHeader(HEADER_WX_OPENID);
+        }
 
         try {
             if (!StringUtils.hasText(openid)) {
-                log.warn("[Login] X-WX-OPENID 为空，登录失败");
+                log.warn("[Login] openid 为空，登录失败");
                 return ResponseEntity.status(401).build();
             }
 

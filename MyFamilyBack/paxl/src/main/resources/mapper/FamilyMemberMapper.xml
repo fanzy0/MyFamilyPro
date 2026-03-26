@@ -25,6 +25,13 @@
         <result column="role"         property="role"/>
     </resultMap>
 
+    <!-- 家庭成员简要信息映射，用于家庭详情展示 -->
+    <resultMap id="FamilyMemberBriefResultMap" type="com.my.family.paxl.domain.vo.FamilyMemberBriefVO">
+        <result column="user_id"   property="userId"/>
+        <result column="nickname"  property="nickname"/>
+        <result column="role"      property="role"/>
+    </resultMap>
+
     <!-- 通用查询字段 -->
     <sql id="FamilyMember_Base_Columns">
         id, family_id, user_id, role, join_status, join_time, create_time, update_time
@@ -90,11 +97,11 @@
     <!-- 查询指定家庭下待审批的成员列表 -->
     <select id="selectPendingMembers" resultMap="FamilyMemberResultMap">
         SELECT
-        <include refid="FamilyMember_Base_Columns"/>
-        FROM mf_family_member
-        WHERE family_id = #{familyId}
-          AND join_status = 'PENDING'
-        ORDER BY create_time ASC
+            a.id, a.family_id, a.user_id, a.role, a.join_status, b.nickname, a.join_time, a.create_time, a.update_time
+        FROM mf_family_member a left join mf_user b ON a.user_id = b.id
+        WHERE a.family_id = #{familyId}
+          AND a.join_status = 'PENDING'
+        ORDER BY a.create_time ASC
     </select>
 
     <!-- 批量查询多个家庭中所有 APPROVED 成员（定时任务使用） -->
@@ -123,6 +130,22 @@
           AND fm.join_status = 'APPROVED'
           AND f.status       = 0
         ORDER BY f.create_time ASC
+    </select>
+
+    <!-- 查询指定家庭下所有已通过成员简要信息（含昵称） -->
+    <select id="selectApprovedMemberBriefs" resultMap="FamilyMemberBriefResultMap">
+        SELECT
+            fm.user_id AS user_id,
+            COALESCE(u.nickname, '') AS nickname,
+            fm.role AS role
+        FROM mf_family_member fm
+                 LEFT JOIN mf_user u ON fm.user_id = u.id
+        WHERE fm.family_id = #{familyId}
+          AND fm.join_status = 'APPROVED'
+        ORDER BY
+            CASE WHEN fm.role = 'OWNER' THEN 0 ELSE 1 END,
+            fm.join_time ASC,
+            fm.id ASC
     </select>
 
 </mapper>

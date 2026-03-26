@@ -63,8 +63,24 @@
         disabled="{{loginLoading || !agreed}}"
       >
         <view class="btn-content">
-          <text class="wechat-icon" wx:if="{{!loginLoading}}">微信</text>
           <text class="btn-text">{{loginLoading ? '登录中...' : '微信一键登录'}}</text>
+        </view>
+      </button>
+
+      <!-- 分隔线 -->
+      <view class="divider-wrap">
+        <view class="divider-line"></view>
+        <view class="divider-line"></view>
+      </view>
+
+      <!-- 临时登录按钮 -->
+      <button
+        class="temp-login-btn {{tempLoginLoading ? 'temp-login-btn-loading' : ''}}"
+        bindtap="onTempLoginTap"
+        disabled="{{tempLoginLoading}}"
+      >
+        <view class="btn-content">
+          <text class="temp-btn-text">{{tempLoginLoading ? '登录中...' : '临时登录'}}</text>
         </view>
       </button>
     </view>

@@ -3,6 +3,8 @@ package com.my.family.paxl.service.impl;
 import com.my.family.paxl.domain.entity.FamilyDO;
 import com.my.family.paxl.domain.entity.FamilyMemberDO;
 import com.my.family.paxl.domain.vo.FamilyBriefVO;
+import com.my.family.paxl.domain.vo.FamilyDetailVO;
+import com.my.family.paxl.domain.vo.FamilyMemberBriefVO;
 import com.my.family.paxl.mapper.FamilyMapper;
 import com.my.family.paxl.mapper.FamilyMemberMapper;
 import com.my.family.paxl.service.FamilyService;
@@ -219,6 +221,73 @@ public class FamilyServiceImpl implements FamilyService {
             throw new IllegalArgumentException("用户ID不合法");
         }
         return familyMemberMapper.selectFamiliesByUserId(userId);
+    }
+
+    @Override
+    public FamilyDetailVO getFamilyDetail(Long userId, Long familyId) {
+        log.info("[GetFamilyDetail] 查询家庭详情, userId={}, familyId={}", userId, familyId);
+        if (userId == null || userId <= 0 || familyId == null || familyId <= 0) {
+            throw new IllegalArgumentException("参数不合法");
+        }
+
+        FamilyMemberDO relation = familyMemberMapper.selectByFamilyIdAndUserId(familyId, userId);
+        if (relation == null || !FamilyMemberDO.STATUS_APPROVED.equals(relation.getJoinStatus())) {
+            throw new IllegalArgumentException("您未加入该家庭，无法查看详情");
+        }
+
+        FamilyDO family = familyMapper.selectById(familyId);
+        if (family == null || family.getStatus() == null || family.getStatus() != FamilyDO.STATUS_NORMAL) {
+            throw new IllegalArgumentException("家庭不存在或不可用");
+        }
+
+        List<FamilyMemberBriefVO> members = familyMemberMapper.selectApprovedMemberBriefs(familyId);
+
+        FamilyDetailVO vo = new FamilyDetailVO();
+        vo.setFamilyId(family.getId());
+        vo.setFamilyName(family.getFamilyName());
+        vo.setFamilyCode(family.getFamilyCode());
+        vo.setMemberCount(family.getMemberCount());
+        vo.setCurrentUserRole(relation.getRole());
+        vo.setMembers(members);
+        return vo;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFamilyInfo(Long ownerUserId, Long familyId, String familyName, String meetDateStr) {
+        log.info("[UpdateFamilyInfo] 更新家庭信息, ownerUserId={}, familyId={}, familyName={}, meetDate={}",
+                ownerUserId, familyId, familyName, meetDateStr);
+
+        if (ownerUserId == null || ownerUserId <= 0 || familyId == null || familyId <= 0) {
+            throw new IllegalArgumentException("参数不合法");
+        }
+        if (!StringUtils.hasText(familyName) || familyName.trim().length() < 2 || familyName.trim().length() > 64) {
+            throw new IllegalArgumentException("家庭名称长度需为 2~64");
+        }
+
+        // 仅户主可操作
+        assertOwner(ownerUserId, familyId);
+
+        // meetDate 允许为空；非空时校验格式
+        String meetDate = null;
+        if (StringUtils.hasText(meetDateStr)) {
+            try {
+                LocalDate.parse(meetDateStr.trim());
+                meetDate = meetDateStr.trim();
+            } catch (DateTimeParseException e) {
+                throw new IllegalArgumentException("meetDate 格式不合法");
+            }
+        }
+
+        FamilyDO family = familyMapper.selectById(familyId);
+        if (family == null || family.getStatus() == null || family.getStatus() != FamilyDO.STATUS_NORMAL) {
+            throw new IllegalArgumentException("家庭不存在或不可用");
+        }
+
+        int rows = familyMapper.updateFamilyInfo(familyId, familyName.trim(), meetDate);
+        if (rows <= 0) {
+            throw new IllegalArgumentException("更新失败，请稍后重试");
+        }
     }
 
     /**

@@ -23,10 +23,11 @@ function get(path, params) {
  * POST 请求（业务层）
  * @param {String} path 请求路径（如：/auth/login）
  * @param {Object} data 请求体数据（可选）
+ * @param {Object} header 附加请求头（可选）
  * @return {Promise}
  */
-function post(path, data) {
-  return cloudRequest.post(path, data).catch(handleError);
+function post(path, data, header) {
+  return cloudRequest.post(path, data, header).catch(handleError);
 }
 
 /**
