@@ -31,10 +31,19 @@
 
       <!-- 最近回忆 -->
       <view class="memories-section">
+
+        <!-- 标题行（纯展示，操作通过双击图片触发） -->
+        <view class="memories-header">
+          <view class="memories-title-wrap">
+            <text class="memories-title">时光剪影</text>
+          </view>
+        </view>
+
+        <!-- 轮播图 -->
         <swiper
           class="memory-swiper"
           indicator-dots="{{memoryImages.length > 1}}"
-          autoplay="{{memoryImages.length > 1}}"
+          autoplay="{{memoryImages.length > 1 && !uploadingMemory}}"
           interval="{{3000}}"
           duration="{{500}}"
           circular="{{true}}"
@@ -42,20 +51,38 @@
           indicator-active-color="#fff"
           bindchange="onMemorySwiperChange"
         >
+          <!-- 有图片时：点击事件用于检测双击 -->
           <swiper-item wx:for="{{memoryImages}}" wx:key="bannerId">
-            <image
-              class="memory-image"
-              src="{{item.src}}"
-              mode="aspectFill"
-            ></image>
+            <view
+              class="memory-item-wrap"
+              bindtap="onMemoryTap"
+            >
+              <image
+                class="memory-image {{item.loaded ? '' : 'memory-image-loading'}}"
+                src="{{item.src}}"
+                mode="aspectFill"
+              ></image>
+              <!-- 图片加载中转圈 -->
+              <view class="memory-img-placeholder" wx:if="{{!item.loaded}}">
+                <view class="memory-img-spinner"></view>
+              </view>
+              <!-- 上传进度遮罩 -->
+              <view class="memory-uploading-mask" wx:if="{{uploadingMemory}}">
+                <view class="memory-uploading-spinner"></view>
+                <text class="memory-uploading-text">上传中...</text>
+              </view>
+            </view>
           </swiper-item>
+
+          <!-- 无图片时：点击直接添加 -->
           <swiper-item wx:if="{{memoryImages.length === 0}}">
-            <view class="memory-placeholder">
+            <view class="memory-placeholder" bindtap="onAddMemory">
               <text class="placeholder-icon">🌸</text>
-              <text class="placeholder-text">暂无回忆，快去记录吧~</text>
+              <text class="placeholder-text">暂无回忆，轻触此处添加第一张~</text>
             </view>
           </swiper-item>
         </swiper>
+
       </view>
 
       <!-- 功能菜单 -->

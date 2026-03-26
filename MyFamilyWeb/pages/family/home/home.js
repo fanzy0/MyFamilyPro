@@ -34,11 +34,17 @@ Page({
     remindCount: 0,           // 活跃提醒数量（红点数字，0 时隐藏悬浮按钮）
     showRemindPanel: false,   // 是否展开提醒浮层
     remindList: [],           // 活跃提醒列表（展开浮层时拉取）
-    remindLoading: false      // 浮层内容加载状态
+    remindLoading: false,     // 浮层内容加载状态
+
+    // 轮播图上传
+    uploadingMemory: false,      // 是否正在上传图片
+    currentMemoryIndex: 0        // 当前可见的轮播图索引（用于双击后定位操作目标）
   },
 
   onLoad() {
     console.log('[Home] 家庭主页加载');
+    // 双击检测：记录上次点击时间，不放入 data（无需触发渲染）
+    this._lastTapTime = 0;
     this._refreshFamilyData();
   },
 
@@ -264,15 +270,58 @@ Page({
   },
 
   /**
-   * swiper 切换时懒加载当前索引图片
+   * swiper 切换时同步当前索引并懒加载图片
    */
   onMemorySwiperChange(e) {
     const index = e.detail.current;
+    this.setData({ currentMemoryIndex: index });
     this._ensureBannerImageLoaded(index);
   },
 
   /**
-   * 确保指定索引的轮播图已加载，如未加载则调用图片接口并写入缓存
+   * 轮播图点击：检测双击（300ms 内连续两次点击触发操作菜单）
+   */
+  onMemoryTap() {
+    const now = Date.now();
+    if (now - this._lastTapTime < 300) {
+      // 双击确认，重置计时器并弹出操作菜单
+      this._lastTapTime = 0;
+      this._showMemoryActions();
+    } else {
+      this._lastTapTime = now;
+    }
+  },
+
+  /**
+   * 弹出回忆照片操作菜单（通过 wx.showActionSheet）
+   */
+  _showMemoryActions() {
+    if (this.data.uploadingMemory) {
+      wx.showToast({ title: '上传中，请稍候', icon: 'none' });
+      return;
+    }
+
+    wx.showActionSheet({
+      itemList: ['增加一张照片', '删除当前照片'],
+      success: (res) => {
+        if (res.tapIndex === 0) {
+          this.onAddMemory();
+        } else if (res.tapIndex === 1) {
+          const index = this.data.currentMemoryIndex;
+          const item = this.data.memoryImages[index];
+          if (item) {
+            this._doDeleteMemory(item.bannerId);
+          }
+        }
+      }
+    });
+  },
+
+  /**
+   * 确保指定索引的轮播图已加载，如未加载则拉取并写入缓存
+   * 支持两种 imagePath：
+   *   cloud:// 开头 → 微信云存储 fileID，用 getTempFileURL 获取临时访问地址
+   *   其他          → 旧版后端存储，调用 /api/banner/image/view 接口
    * @param {Number} index 轮播图索引
    */
   _ensureBannerImageLoaded(index) {
@@ -282,21 +331,36 @@ Page({
     const item = list[index];
     if (!item || item.loaded || !item.imagePath) return;
 
+    // 云存储 fileID：通过 getTempFileURL 换取临时可访问 URL
+    if (item.imagePath.startsWith('cloud://')) {
+      wx.cloud.getTempFileURL({
+        fileList: [item.imagePath],
+        success: (res) => {
+          const tempUrl = res.fileList && res.fileList[0] && res.fileList[0].tempFileURL;
+          if (!tempUrl) return;
+          const updated = this.data.memoryImages.slice();
+          if (!updated[index]) return;
+          updated[index].src = tempUrl;
+          updated[index].loaded = true;
+          this.setData({ memoryImages: updated });
+        },
+        fail: (err) => {
+          console.error('[Home] 获取云存储临时 URL 失败:', err);
+        }
+      });
+      return;
+    }
+
+    // 旧版后端存储：通过接口拉取图片字节流
     bannerApi.getBannerImage(item.imagePath)
       .then(buffer => {
         try {
           const base64 = wx.arrayBufferToBase64(buffer);
-          // 简单根据后缀猜测 mime 类型，默认 jpeg
           let mime = 'image/jpeg';
-          if (item.imagePath.endsWith('.png')) {
-            mime = 'image/png';
-          } else if (item.imagePath.endsWith('.gif')) {
-            mime = 'image/gif';
-          } else if (item.imagePath.endsWith('.webp')) {
-            mime = 'image/webp';
-          }
+          if (item.imagePath.endsWith('.png')) mime = 'image/png';
+          else if (item.imagePath.endsWith('.gif')) mime = 'image/gif';
+          else if (item.imagePath.endsWith('.webp')) mime = 'image/webp';
           const src = `data:${mime};base64,${base64}`;
-
           const updated = this.data.memoryImages.slice();
           if (!updated[index]) return;
           updated[index].src = src;
@@ -309,6 +373,100 @@ Page({
       .catch(err => {
         console.error('[Home] 加载轮播图图片失败:', err);
       });
+  },
+
+  // ============================
+  //   最近回忆 — 上传 / 删除
+  // ============================
+
+  /**
+   * 添加回忆照片
+   * 1. wx.chooseMedia 选择图片
+   * 2. wx.cloud.uploadFile 上传至云存储，获取 fileID
+   * 3. POST /api/banner/save 保存轮播图记录
+   * 4. 刷新轮播图列表
+   */
+  onAddMemory() {
+    const familyId = this.data.currentFamily && this.data.currentFamily.familyId;
+    if (!familyId) return;
+    if (this.data.uploadingMemory) return;
+
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: (res) => {
+        const tempFilePath = res.tempFiles[0].tempFilePath;
+        // 从文件路径中提取后缀，兜底 jpg
+        const extMatch = tempFilePath.match(/\.(\w+)$/);
+        const ext = extMatch ? extMatch[1].toLowerCase() : 'jpg';
+        const cloudPath = `banners/${familyId}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+
+        this.setData({ uploadingMemory: true });
+        console.log('[Home] 开始上传回忆照片, cloudPath=' + cloudPath);
+
+        wx.cloud.uploadFile({
+          cloudPath,
+          filePath: tempFilePath,
+          success: (uploadRes) => {
+            const fileID = uploadRes.fileID;
+            console.log('[Home] 云存储上传成功, fileID=' + fileID);
+
+            bannerApi.saveBanner({ familyId, imagePath: fileID })
+              .then(() => {
+                this.setData({ uploadingMemory: false });
+                wx.showToast({ title: '添加成功', icon: 'success', duration: 1500 });
+                this._loadMemoryBanners(familyId);
+              })
+              .catch(err => {
+                this.setData({ uploadingMemory: false });
+                console.error('[Home] 保存轮播图记录失败:', err);
+              });
+          },
+          fail: (err) => {
+            this.setData({ uploadingMemory: false });
+            console.error('[Home] 云存储上传失败:', err);
+            wx.showToast({ title: '上传失败，请重试', icon: 'none', duration: 2000 });
+          }
+        });
+      },
+      fail: () => {
+        // 用户取消选择，不提示错误
+      }
+    });
+  },
+
+  /**
+   * 删除指定轮播图（带二次确认）
+   * @param {number} bannerId 轮播图业务ID
+   */
+  _doDeleteMemory(bannerId) {
+    if (!bannerId) return;
+
+    wx.showModal({
+      title: '删除回忆',
+      content: '确定要删除这张照片吗？',
+      confirmText: '删除',
+      confirmColor: '#e53e3e',
+      cancelText: '取消',
+      success: (res) => {
+        if (!res.confirm) return;
+
+        wx.showLoading({ title: '删除中...' });
+        bannerApi.deleteBanner(bannerId)
+          .then(() => {
+            wx.hideLoading();
+            wx.showToast({ title: '已删除', icon: 'success', duration: 1500 });
+            this.setData({ currentMemoryIndex: 0 });
+            const familyId = this.data.currentFamily && this.data.currentFamily.familyId;
+            this._loadMemoryBanners(familyId);
+          })
+          .catch(err => {
+            wx.hideLoading();
+            console.error('[Home] 删除轮播图失败:', err);
+          });
+      }
+    });
   },
 
   /**

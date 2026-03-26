@@ -185,7 +185,10 @@ page {
   font-size: 26rpx;
   color: #7a8c9c;
   line-height: 1.7;
+  /* 让内部多个 text 节点按“节点边界”换行，避免窄屏下出现奇怪的断行 */
+  display: flex;
   flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .agreement-prefix {

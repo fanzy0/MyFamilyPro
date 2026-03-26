@@ -77,6 +77,11 @@
         WHERE id = #{id}
     </update>
 
+    <delete id="deleteById">
+        DELETE FROM t_banner
+        WHERE id = #{id}
+    </delete>
+
     <!--
       根据轮播图ID（业务编号）查询轮播图片信息
     -->
@@ -111,14 +116,6 @@
         ORDER BY position ASC, create_time DESC
     </select>
 
-    <!--
-      根据主键ID逻辑删除轮播图片
-    -->
-    <update id="deleteById" parameterType="java.lang.Long">
-        UPDATE t_banner
-        SET deleted = 1, update_time = NOW()
-        WHERE id = #{id}
-    </update>
 
 </mapper>
 
