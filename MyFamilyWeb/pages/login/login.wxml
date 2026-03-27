@@ -9,7 +9,7 @@
     </view>
   </view>
 
-  <!-- 登录主体内容 -->
+  <!-- 网络降级兜底：仅在临时登录也失败时展示 -->
   <view class="login-body" wx:if="{{!loading}}">
 
     <!-- Logo 与标题区域 -->
@@ -33,7 +33,7 @@
       </view>
     </view>
 
-    <!-- 登录按钮区域 -->
+    <!-- 登录按钮区域（仅网络故障降级时展示） -->
     <view class="login-section">
 
       <!-- 协议勾选 -->
@@ -67,22 +67,6 @@
         </view>
       </button>
 
-      <!-- 分隔线 -->
-      <view class="divider-wrap">
-        <view class="divider-line"></view>
-        <view class="divider-line"></view>
-      </view>
-
-      <!-- 临时登录按钮 -->
-      <button
-        class="temp-login-btn {{tempLoginLoading ? 'temp-login-btn-loading' : ''}}"
-        bindtap="onTempLoginTap"
-        disabled="{{tempLoginLoading}}"
-      >
-        <view class="btn-content">
-          <text class="temp-btn-text">{{tempLoginLoading ? '登录中...' : '临时登录'}}</text>
-        </view>
-      </button>
     </view>
 
   </view>

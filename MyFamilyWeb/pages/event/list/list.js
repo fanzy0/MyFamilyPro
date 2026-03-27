@@ -25,6 +25,7 @@ Page({
   data: {
     loading: true,
     refreshing: false,
+    isTempLogin: false,     // 是否为临时体验用户
 
     familyId: null,
     currentFamilyName: '',
@@ -35,7 +36,7 @@ Page({
     keyword: '',
     activeCategory: 'ALL',
 
-    statusBarHeight: 44   // 默认值（px），onLoad 时用真实值覆盖
+    statusBarHeight: 44
   },
 
   onLoad() {
@@ -45,11 +46,12 @@ Page({
     } catch (e) {
       // 保留默认值
     }
+    this._syncTempLoginState();
     this._initFamily().then(() => this._loadList());
   },
 
   onShow() {
-    // 从编辑页返回时刷新
+    this._syncTempLoginState();
     if (this.data.familyId) {
       this._loadList(true);
     }
@@ -67,6 +69,7 @@ Page({
   },
 
   onCreateTap() {
+    if (!this._requireLogin()) return;
     wx.navigateTo({ url: '/pages/event/edit/edit' });
   },
 
@@ -76,11 +79,13 @@ Page({
   },
 
   onEditTap(e) {
+    if (!this._requireLogin()) return;
     const eventId = e.currentTarget.dataset.eventId;
     wx.navigateTo({ url: `/pages/event/edit/edit?eventId=${eventId}` });
   },
 
   onDeleteTap(e) {
+    if (!this._requireLogin()) return;
     const eventId = e.currentTarget.dataset.eventId;
     wx.showModal({
       title: '确认删除',
@@ -100,6 +105,40 @@ Page({
           });
       }
     });
+  },
+
+  /**
+   * 同步临时登录状态
+   */
+  _syncTempLoginState() {
+    const app = getApp();
+    this.setData({ isTempLogin: !!app.globalData.isTempLogin });
+  },
+
+  /**
+   * 写操作守卫：临时用户弹出登录引导
+   */
+  _requireLogin() {
+    if (!this.data.isTempLogin) return true;
+    const modal = this.selectComponent('#loginModal');
+    if (modal) modal.show();
+    return false;
+  },
+
+  /**
+   * 登录成功回调：刷新列表（此时已是真实用户）
+   */
+  onLoginSuccess() {
+    this.setData({ isTempLogin: false });
+    this._loadList(true);
+  },
+
+  /**
+   * 临时用户点击提示条主动唤起登录弹窗
+   */
+  onTempUserLoginTap() {
+    const modal = this.selectComponent('#loginModal');
+    if (modal) modal.show();
   },
 
   onKeywordInput(e) {

@@ -1,6 +1,9 @@
 <!-- pages/event/list/list.wxml -->
 <view class="container">
 
+  <!-- 登录弹窗组件 -->
+  <login-modal id="loginModal" bind:loginSuccess="onLoginSuccess"></login-modal>
+
   <!-- ====== 顶部区域 ====== -->
   <view class="header" >
 
@@ -59,6 +62,12 @@
     refresher-triggered="{{refreshing}}"
     bindrefresherrefresh="onRefresh"
   >
+
+    <!-- 临时用户体验模式提示 -->
+    <view class="temp-banner" wx:if="{{isTempLogin}}" bindtap="onTempUserLoginTap">
+      <text class="temp-banner-icon">👀</text>
+      <text class="temp-banner-text">体验模式·仅可查看，登录后可新增和编辑</text>
+    </view>
 
     <!-- 数量栏 -->
     <view class="count-bar">

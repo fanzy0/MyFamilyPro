@@ -1477,3 +1477,35 @@ page {
 .my-item-title-danger {
   color: #e53e3e;
 }
+
+/* ============================
+   临时用户体验模式提示条
+   ============================ */
+.temp-banner {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #fff7e6 0%, #fff0d4 100%);
+  border: 1rpx solid #ffd591;
+  border-radius: 16rpx;
+  margin: 24rpx 24rpx 8rpx;
+  padding: 20rpx 24rpx;
+  gap: 12rpx;
+}
+
+.temp-banner-icon {
+  font-size: 32rpx;
+  flex-shrink: 0;
+}
+
+.temp-banner-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #d46b08;
+  line-height: 1.4;
+}
+
+.temp-banner-arrow {
+  font-size: 32rpx;
+  color: #d46b08;
+  flex-shrink: 0;
+}

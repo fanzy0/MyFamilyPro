@@ -9,6 +9,9 @@ Page({
    * 页面初始数据
    */
   data: {
+    // 登录状态
+    isTempLogin: false,     // 是否为临时体验用户（只读模式）
+
     // 家庭数据
     currentFamily: null,    // 当前家庭 {familyId, familyName, familyCode, role, memberCount, meetDate}
     familyList: [],         // 所有已加入家庭列表
@@ -64,14 +67,15 @@ Page({
 
   onLoad() {
     console.log('[Home] 家庭主页加载');
-    // 双击检测：记录上次点击时间，不放入 data（无需触发渲染）
     this._lastTapTime = 0;
+    this._syncTempLoginState();
     this._refreshFamilyData();
   },
 
   onReady() {},
 
   onShow() {
+    this._syncTempLoginState();
     this._refreshFamilyData();
   },
 
@@ -206,9 +210,10 @@ Page({
   // ============================
 
   /**
-   * 展开/收起 信息修改主面板
+   * 展开/收起 信息修改主面板（写操作，临时用户需先登录）
    */
   onToggleEditInfo() {
+    if (!this.data.showEditInfo && !this._requireLogin()) return;
     this.setData({
       showEditInfo: !this.data.showEditInfo,
       showEditProfile: false,
@@ -255,9 +260,10 @@ Page({
   },
 
   /**
-   * 展开/收起 家庭管理主面板
+   * 展开/收起 家庭管理主面板（写操作，临时用户需先登录）
    */
   onToggleFamilyManagement() {
+    if (!this.data.showFamilyManagement && !this._requireLogin()) return;
     this.setData({
       showFamilyManagement: !this.data.showFamilyManagement,
       showLoginManagement: false,
@@ -489,12 +495,13 @@ Page({
 
   /**
    * 轮播图点击：检测双击（300ms 内连续两次点击触发操作菜单）
+   * 临时用户双击也会弹出登录引导
    */
   onMemoryTap() {
     const now = Date.now();
     if (now - this._lastTapTime < 300) {
-      // 双击确认，重置计时器并弹出操作菜单
       this._lastTapTime = 0;
+      if (!this._requireLogin()) return;
       this._showMemoryActions();
     } else {
       this._lastTapTime = now;
@@ -589,13 +596,10 @@ Page({
   // ============================
 
   /**
-   * 添加回忆照片
-   * 1. wx.chooseMedia 选择图片
-   * 2. wx.cloud.uploadFile 上传至云存储，获取 fileID
-   * 3. POST /api/banner/save 保存轮播图记录
-   * 4. 刷新轮播图列表
+   * 添加回忆照片（写操作，临时用户需先登录）
    */
   onAddMemory() {
+    if (!this._requireLogin()) return;
     const familyId = this.data.currentFamily && this.data.currentFamily.familyId;
     if (!familyId) return;
     if (this.data.uploadingMemory) return;
@@ -931,13 +935,13 @@ Page({
   },
 
   /**
-   * 退出登录
-   * 清除本地登录状态，跳转登录页（可重新选择微信登录或临时登录）
+   * 退出登录（仅真实用户可操作）
+   * 退出后重新走临时登录流程进入体验模式
    */
   onLogout() {
     wx.showModal({
       title: '退出登录',
-      content: '确定要退出当前账号吗？退出后可重新选择登录方式。',
+      content: '确定要退出当前账号吗？退出后将进入体验模式。',
       confirmText: '退出',
       cancelText: '取消',
       success: (res) => {
@@ -948,7 +952,6 @@ Page({
         }
         if (app) {
           app.globalData.authChecked = true;
-          app.globalData.isTempLogin = false;  // 退出后清除临时登录标记
         }
         wx.redirectTo({ url: '/pages/login/login' });
       }
@@ -1011,5 +1014,51 @@ Page({
         this.setData({ showRemindPanel: false });
       }, 800);
     }
+  },
+
+  // ============================
+  //   临时登录 / 登录弹窗相关
+  // ============================
+
+  /**
+   * 同步 globalData 中的 isTempLogin 到页面 data
+   */
+  _syncTempLoginState() {
+    const app = getApp();
+    this.setData({ isTempLogin: !!app.globalData.isTempLogin });
+  },
+
+  /**
+   * 写操作守卫：若当前为临时体验用户，弹出登录弹窗并返回 false
+   * @return {Boolean} true 表示可继续执行写操作；false 表示已拦截并弹出登录提示
+   */
+  _requireLogin() {
+    if (!this.data.isTempLogin) return true;
+    const modal = this.selectComponent('#loginModal');
+    if (modal) modal.show();
+    return false;
+  },
+
+  /**
+   * 登录弹窗登录成功回调
+   * 更新页面登录状态，重新拉取真实用户的家庭数据
+   */
+  onLoginSuccess(e) {
+    console.log('[Home] 登录成功，刷新家庭数据');
+    this.setData({ isTempLogin: false });
+    const familyList = (e.detail && e.detail.familyList) || [];
+    if (familyList.length === 0) {
+      wx.redirectTo({ url: '/pages/family/guide/guide' });
+    } else {
+      this._refreshFamilyData();
+    }
+  },
+
+  /**
+   * 临时用户主动点击"立即登录"（登录管理面板入口）
+   */
+  onTempUserLoginTap() {
+    const modal = this.selectComponent('#loginModal');
+    if (modal) modal.show();
   }
 });

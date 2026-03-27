@@ -27,9 +27,11 @@ function cloudRequest(options) {
       'content-type': 'application/json'
     };
 
-    // 临时登录模式：所有请求自动携带 TEMP-OPENID，确保后续接口也以临时账号身份鉴权
+    // 临时登录模式：大多数请求自动携带 TEMP-OPENID，确保后续接口也以临时账号身份鉴权
+    // 但真实登录接口 /auth/login 不能带该头，否则会污染微信一键登录流程
     const app = getApp();
-    if (app && app.globalData && app.globalData.isTempLogin) {
+    const shouldAttachTempOpenId = options.attachTempOpenId !== false;
+    if (app && app.globalData && app.globalData.isTempLogin && shouldAttachTempOpenId) {
       defaultHeader['TEMP-OPENID'] = 'QINGJUXUNUAN001';
     }
 
@@ -57,7 +59,8 @@ function cloudRequest(options) {
           reject({
             code: res.statusCode,
             message: '请求失败',
-            data: res.data
+            data: res.data,
+            path: options.path
           });
         }
       },
@@ -66,7 +69,8 @@ function cloudRequest(options) {
         reject({
           code: -1,
           message: err.errMsg || '网络请求失败',
-          error: err
+          error: err,
+          path: options.path
         });
       }
     });
@@ -102,11 +106,14 @@ function get(path, params) {
  * @return {Promise}
  */
 function post(path, data, header) {
+  // 真实微信登录必须使用当前微信 openid，不可附带临时账号头
+  const attachTempOpenId = path !== '/auth/login';
   return cloudRequest({
     path: path,
     method: 'POST',
     data: data,
-    header: header
+    header: header,
+    attachTempOpenId: attachTempOpenId
   });
 }
 

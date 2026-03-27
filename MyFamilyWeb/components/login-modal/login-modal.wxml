@@ -1,0 +1,44 @@
+<!-- components/login-modal/login-modal.wxml -->
+<view class="lm-mask" wx:if="{{visible}}" bindtap="onMaskTap">
+  <view class="lm-panel" catchtap="onPanelTap">
+
+    <!-- 顶部图标 + 标题 -->
+    <view class="lm-header">
+      <view class="lm-logo-circle">
+        <text class="lm-logo-text">家</text>
+      </view>
+      <text class="lm-title">登录后继续</text>
+      <text class="lm-subtitle">登录后即可使用完整功能，记录家庭美好时光</text>
+    </view>
+
+    <!-- 协议勾选 -->
+    <view class="lm-agreement" bindtap="onToggleAgreement">
+      <view class="lm-checkbox {{agreed ? 'lm-checkbox-checked' : ''}}">
+        <text class="lm-checkbox-icon" wx:if="{{agreed}}">✓</text>
+      </view>
+      <view class="lm-agreement-text">
+        <text class="lm-agreement-prefix">我已阅读并同意</text>
+        <text class="lm-agreement-link" catchtap="onViewProtocol" data-type="USER_PROTOCOL">《用户协议》</text>
+        <text class="lm-agreement-prefix">和</text>
+        <text class="lm-agreement-link" catchtap="onViewProtocol" data-type="PRIVACY_STATEMENT">《隐私声明》</text>
+      </view>
+    </view>
+
+    <!-- 微信一键登录按钮 -->
+    <button
+      class="lm-login-btn {{loginLoading ? 'lm-login-btn-loading' : ''}} {{!agreed ? 'lm-login-btn-disabled' : ''}}"
+      bindtap="onLoginTap"
+      disabled="{{loginLoading || !agreed}}"
+    >
+      <view class="lm-btn-content">
+        <text class="lm-btn-text">{{loginLoading ? '登录中...' : '微信一键登录'}}</text>
+      </view>
+    </button>
+
+    <!-- 取消按钮 -->
+    <view class="lm-cancel-btn" bindtap="onCancel">
+      <text class="lm-cancel-text">暂不登录，继续体验</text>
+    </view>
+
+  </view>
+</view>

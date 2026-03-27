@@ -1,0 +1,175 @@
+/* components/login-modal/login-modal.wxss */
+
+/* 遮罩层 */
+.lm-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* 弹出面板（从底部弹出） */
+.lm-panel {
+  width: 100%;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  padding: 48rpx 48rpx 60rpx;
+  box-sizing: border-box;
+}
+
+/* 顶部区域 */
+.lm-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 48rpx;
+}
+
+.lm-logo-circle {
+  width: 96rpx;
+  height: 96rpx;
+  background: linear-gradient(135deg, #ff6b9d 0%, #ff8e53 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 107, 157, 0.35);
+}
+
+.lm-logo-text {
+  color: #fff;
+  font-size: 40rpx;
+  font-weight: bold;
+}
+
+.lm-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #1a1a1a;
+  margin-bottom: 12rpx;
+}
+
+.lm-subtitle {
+  font-size: 26rpx;
+  color: #999;
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* 协议区 */
+.lm-agreement {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 40rpx;
+  padding: 0 8rpx;
+}
+
+.lm-checkbox {
+  width: 36rpx;
+  height: 36rpx;
+  border: 2rpx solid #ddd;
+  border-radius: 6rpx;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.lm-checkbox-checked {
+  background: #ff6b9d;
+  border-color: #ff6b9d;
+}
+
+.lm-checkbox-icon {
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.lm-agreement-text {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.lm-agreement-prefix {
+  color: #666;
+  white-space: nowrap;
+}
+
+.lm-agreement-link {
+  color: #ff6b9d;
+  white-space: nowrap;
+}
+
+/* 登录按钮 */
+.lm-login-btn {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(135deg, #07c160 0%, #06ad56 100%);
+  border-radius: 48rpx;
+  border: none;
+  margin-bottom: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(7, 193, 96, 0.35);
+}
+
+.lm-login-btn-disabled {
+  background: #c8e6c9;
+  box-shadow: none;
+  opacity: 0.7;
+}
+
+.lm-login-btn-loading {
+  opacity: 0.8;
+}
+
+.lm-btn-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+}
+
+.lm-btn-icon {
+  font-size: 26rpx;
+  color: #fff;
+  font-weight: bold;
+  background: rgba(255,255,255,0.25);
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.lm-btn-text {
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+/* 取消按钮 */
+.lm-cancel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx;
+}
+
+.lm-cancel-text {
+  font-size: 28rpx;
+  color: #aaa;
+}

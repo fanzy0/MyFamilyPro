@@ -56,8 +56,18 @@ function getImage(path) {
  */
 function handleError(err) {
   const code = err && err.code;
+  const backendCode = err && err.data && err.data.code;
+  const backendMessage = err && err.data && err.data.message;
+  const requestPath = err && err.path;
 
   if (code === 401) {
+    // 登录相关接口的 401 属于业务分支（如用户不存在/已注销），交给上层页面自行处理
+    if (requestPath === '/auth/login' || requestPath === '/user/me') {
+      return Promise.reject(err);
+    }
+    if (backendCode === 'USER_NOT_FOUND' || backendCode === 'USER_DEACTIVATED') {
+      return Promise.reject(err);
+    }
     const pages = getCurrentPages();
     const currentPage = pages[pages.length - 1];
     const isOnLoginPage = currentPage && currentPage.route && currentPage.route.includes('login');
@@ -89,7 +99,7 @@ function handleError(err) {
     });
   } else if (code !== 401) {
     wx.showToast({
-      title: (err && err.message) || '请求失败，请稍后重试',
+      title: backendMessage || (err && err.message) || '请求失败，请稍后重试',
       icon: 'none',
       duration: 2000
     });
